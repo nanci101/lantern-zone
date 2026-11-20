@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#060f0d">
+  <meta name="description" content="《拾光者·感染区》—— 在封锁区收集荧光抗体样本，样本越亮能力越强，感染者也会从更远处发现你。带 8 支样本抵达撤离点。">
+  <title>拾光者 · 感染区</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23081210'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%23b9d69b' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='4' fill='%23f1c07d'/%3E%3Cpath d='M32 14v12M32 38v12M15 25l11 6M38 34l11 6M15 39l11-6M38 30l11-6' stroke='%23b9d69b' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <main id="stage" aria-label="拾光者·感染区 游戏画面">
+      <canvas id="game" width="1280" height="720" aria-label="感染区游戏场景"></canvas>
+
+      <div id="uiLayer">
+        <div id="hud" class="hidden" aria-live="polite">
+          <div class="status-card">
+            <div class="brand-mini"><span class="brand-cn">拾光者</span><span class="brand-en">QUARANTINE / DAY 47</span></div>
+            <div class="light-block">
+              <div class="light-numbers">
+                <span class="light-label">携带样本</span>
+                <span class="light-value"><b id="lightNow">0</b><i>/ 8</i></span>
+              </div>
+              <div id="lightPips" class="light-pips" aria-hidden="true"></div>
+            </div>
+            <div class="mini-counts">
+              <span class="mini-count silver-count"><i class="gem silver"></i>蓝 <b id="silverCount">0</b><em>/4</em></span>
+              <span class="mini-count gold-count"><i class="gem gold"></i>红 <b id="goldCount">0</b><em>/3</em></span>
+            </div>
+            <div class="danger-block" id="dangerBlock">
+              <div class="danger-line"><span class="eye-mark" aria-hidden="true"></span><span>感染者感知</span><b id="dangerWord">微弱</b></div>
+              <div class="danger-bars" id="dangerBars" aria-hidden="true">
+                <i></i><i></i><i></i><i></i><i></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="objective-pill" id="objectivePill">
+            <span class="objective-kicker">撤离条件</span>
+            <strong id="objectiveText">带 8 支样本到撤离点</strong>
+          </div>
+
+          <div class="top-actions">
+            <button id="soundBtn" class="icon-btn" type="button" aria-label="静音" title="声音（M）">
+              <svg class="ico-sound" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>
+            </button>
+            <button id="pauseBtn" class="icon-btn" type="button" aria-label="暂停并查看规则" title="暂停（Esc）">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg>
+            </button>
+          </div>
+
+          <div id="alertBanner" class="alert-banner" aria-live="assertive">
+            <span class="alert-eye"></span><b>感染者发现你了</b><span>躲进掩体，切断视线</span>
+          </div>
+
+          <div id="wayfinder" class="wayfinder hidden" aria-hidden="true">
+            <span class="wayfinder-ring"></span>
+            <span class="wayfinder-arrow">↑</span>
+            <span class="wayfinder-label">撤离点</span>
+          </div>
+
+          <div class="hint-strip" id="hintStrip">
+            <span class="keycap">WASD</span><span class="hint-text">移动</span>
+            <span class="hint-sep"></span>
+            <span class="keycap">Shift</span><span class="hint-text">暴走</span>
+            <span class="hint-sep"></span>
+            <span class="hint-text subtle">靠近样本自动拾取</span>
+          </div>
+
+          <button id="interactPrompt" class="interact-prompt hidden" type="button">
+            <span class="prompt-key">E</span>
+            <span class="prompt-copy"><b>进入撤离点</b><small>交出样本，呼叫救援</small></span>
+            <span class="prompt-arrow">→</span>
+          </button>
+        </div>
+
+        <div id="toasts" class="toasts" aria-live="polite"></div>
+        <div id="damageFx" class="damage-fx"></div>
+        <div id="pickupFx" class="pickup-fx"></div>
+        <div id="cinemaBars" class="cinema-bars" aria-hidden="true"></div>
+
+        <div id="touchControls" class="touch-controls" aria-hidden="true">
+          <div class="dpad">
+            <button class="dpad-btn up" type="button" data-move="up" aria-label="向上">▲</button>
+            <button class="dpad-btn left" type="button" data-move="left" aria-label="向左">◀</button>
+            <button class="dpad-btn down" type="button" data-move="down" aria-label="向下">▼</button>
+            <button class="dpad-btn right" type="button" data-move="right" aria-label="向右">▶</button>
+            <span class="dpad-core" aria-hidden="true"></span>
+          </div>
+          <div class="touch-actions">
+            <button id="touchDash" class="touch-dash" type="button" aria-label="暴走冲刺">暴走<small>6 样本</small></button>
+            <button id="touchInteract" class="touch-interact hidden" type="button">进入撤离点</button>
+          </div>
+        </div>
+
+        <section id="titleScreen" class="screen title-screen">
+          <div class="title-left">
+            <div class="eyebrow"><span class="eyebrow-line"></span>隔离区第 47 天 · 一个关于收集与尸群的小作品</div>
+            <h1 class="game-title">
+              <span class="title-main">拾光者</span>
+              <span class="title-sub">感染区</span>
+            </h1>
+            <p class="tagline">你捡起的每一束光，都会把尸群引来。</p>
+
+            <div class="rules-grid">
+              <article class="rule-card">
+                <span class="rule-index">01 / 撤离</span>
+                <h3>带回 8 支样本</h3>
+                <p>蓝色抗体 <b>+1</b>，红色活性样本 <b>+2</b>。<br>把样本带进地图东北角的撤离点。</p>
+              </article>
+              <article class="rule-card">
+                <span class="rule-index">02 / 异变</span>
+                <h3>光会改变你</h3>
+                <p><b>3 支</b>荧光共生，移动更快；<b>6 支</b>临界暴走，<br>解锁冲刺。你越亮，也越不像人。</p>
+              </article>
+              <article class="rule-card danger-rule">
+                <span class="rule-index">03 / 代价</span>
+                <h3>它们在追光</h3>
+                <p>携带的样本越亮，感染者的感知越远。<br>被抓住，会掉落 1 支样本。</p>
+              </article>
+            </div>
+
+            <div class="title-cta-row">
+              <button id="startBtn" class="primary-btn" type="button">
+                <span class="btn-glow"></span>
+                <span class="btn-label">进入感染区</span>
+                <span class="btn-arrow">→</span>
+              </button>
+              <div class="controls-mini">
+                <span><i>WASD</i> / 方向键移动</span>
+                <span><i>Shift</i> 暴走　<i>E</i> 撤离</span>
+              </div>
+            </div>
+
+            <p class="title-footnote"><span class="footnote-star">☣</span> 全场 4 蓝 + 3 红。想凑够 8 支，至少要闯进 2 个红色隔离区。<span class="footnote-dim">试玩约 4 分钟 · 键盘 / 触屏</span></p>
+          </div>
+
+          <div class="title-right" aria-hidden="true">
+            <div class="title-orbit orbit-1"></div>
+            <div class="title-orbit orbit-2"></div>
+            <div class="title-moon">
+              <span class="moon-bite"></span>
+              <span class="moon-crack c1"></span>
+              <span class="moon-crack c2"></span>
+              <span class="moon-crack c3"></span>
+              <span class="moon-biohazard">☣</span>
+            </div>
+            <div class="floating-shard s1"></div>
+            <div class="floating-shard s2"></div>
+            <div class="floating-shard s3"></div>
+            <div class="vertical-mark">QUARANTINE<br><em>DAY 47</em></div>
+            <div class="title-side-note">样本在发光。<br>它们也在看你。</div>
+          </div>
+        </section>
+
+        <section id="pauseScreen" class="screen overlay-screen hidden">
+          <div class="modal pause-modal" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+            <button id="resumeBtn" class="modal-close" type="button" aria-label="继续游戏">×</button>
+            <span class="modal-kicker">PAUSE / 隔离区暂歇</span>
+            <h2 id="pauseTitle">喘口气，它们还没走远。</h2>
+            <div class="pause-columns">
+              <div>
+                <h3>生存规则</h3>
+                <ul class="rule-list">
+                  <li><b>撤离</b><span>带 8 支样本抵达撤离点，按 E 呼叫救援。</span></li>
+                  <li><b>拾取</b><span>蓝色 +1，红色 +2；靠近自动拾取。</span></li>
+                  <li><b>异变</b><span>3 支荧光共生提速，6 支解锁暴走。</span></li>
+                  <li><b>感知</b><span>样本越亮，感染者看得越远；围栏能挡住视线。</span></li>
+                  <li><b>失手</b><span>被感染者碰到会掉落 1 支样本，可以返回捡起。</span></li>
+                </ul>
+              </div>
+              <div>
+                <h3>操作</h3>
+                <div class="key-list">
+                  <div><span class="keycap">WASD</span><span class="keycap">方向键</span><em>移动</em></div>
+                  <div><span class="keycap">Shift</span><em>暴走冲刺（6 支样本解锁）</em></div>
+                  <div><span class="keycap">E</span><em>进入撤离点</em></div>
+                  <div><span class="keycap">M</span><em>静音 / 恢复声音</em></div>
+                  <div><span class="keycap">Esc</span><em>暂停 / 继续</em></div>
+                </div>
+                <div class="pause-tip">提示：先拿蓝，还是先闯红区？带着越多样本，感染者的视野越远。</div>
+              </div>
+            </div>
+            <button id="resumeBtn2" class="primary-btn small-btn" type="button">继续行动 <span>→</span></button>
+          </div>
+        </section>
+
+        <section id="winScreen" class="screen win-screen hidden">
+          <div class="win-glow"></div>
+          <div class="win-content">
+            <span class="modal-kicker">EVAC SIGNAL RECEIVED</span>
+            <h2>信号，亮了。</h2>
+            <p class="win-line">你带回了 <b id="winLight">8</b> 支荧光抗体。<br>救援队的螺旋桨声正在靠近。</p>
+            <div class="win-stats">
+              <div><span>撤离用时</span><b id="statTime">0:00</b></div>
+              <div><span>被感染者抓住</span><b id="statCaught">0</b></div>
+              <div><span>样本</span><b id="statCollect">蓝 4 · 红 2</b></div>
+            </div>
+            <blockquote>“它们还在废墟里，<br>追着那束已经离开的光。”</blockquote>
+            <button id="replayBtn" class="primary-btn" type="button">再闯一次 <span>↻</span></button>
+            <p class="win-footnote">按 Enter 也可以重新开始</p>
+          </div>
+        </section>
+
+        <div id="rotateHint" class="rotate-hint">
+          <div class="rotate-phone">▯</div>
+          <strong>把屏幕横过来</strong>
+          <span>感染区在横屏里展开得更完整</span>
+        </div>
+
+        <div id="bootVeil" class="boot-veil">
+          <div class="boot-mark">拾光者</div>
+          <div class="boot-line"><span></span></div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <noscript>需要启用 JavaScript 才能进入感染区。</noscript>
+  <script src="game.js"></script>
+</body>
+</html>

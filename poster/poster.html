@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1240, initial-scale=1">
+<title>拾光者 · 感染区 — 海报</title>
+<link rel="icon" href="data:,">
+<style>
+  @page { size: A2 portrait; margin: 0; }
+  :root{
+    --ink:#050d0a;
+    --ink2:#0a1711;
+    --cream:#f2e7d1;
+    --cream-dim:#c6b99f;
+    --muted:#8c907b;
+    --green:#a5e5a7;
+    --green-dark:#5f9f6a;
+    --amber:#e7b566;
+    --rust:#d66e51;
+    --line:rgba(235,219,177,.16);
+    --serif:"STKaiti","KaiTi","Kaiti SC","Songti SC","SimSun",serif;
+    --sans:"Microsoft YaHei","PingFang SC","Hiragino Sans GB",sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:#020706;}
+  body{
+    width:1240px;height:1754px;overflow:hidden;
+    color:var(--cream);font-family:var(--sans);
+  }
+  .poster{
+    position:relative;width:1240px;height:1754px;overflow:hidden;
+    background:
+      radial-gradient(ellipse at 80% 12%, rgba(183,105,62,.19), transparent 38%),
+      radial-gradient(ellipse at 12% 68%, rgba(67,124,79,.12), transparent 44%),
+      repeating-linear-gradient(90deg, rgba(237,224,188,.026) 0 1px, transparent 1px 92px),
+      repeating-linear-gradient(0deg, rgba(237,224,188,.018) 0 1px, transparent 1px 92px),
+      linear-gradient(165deg,#0b1711 0%,#06100c 46%,#030908 100%);
+    padding:46px 48px 38px;
+    isolation:isolate;
+  }
+  .poster:before{
+    content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(circle at 92% 8%, rgba(227,182,102,.08), transparent 18%),
+      radial-gradient(circle at 4% 40%, rgba(124,199,132,.05), transparent 23%);
+  }
+  .poster:after{
+    content:"";position:absolute;inset:0;pointer-events:none;z-index:50;
+    box-shadow:inset 0 0 180px rgba(0,0,0,.55);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.11'/%3E%3C/svg%3E");
+    opacity:.32;mix-blend-mode:screen;
+  }
+  .hazard-top{
+    position:absolute;top:0;left:0;right:0;height:13px;z-index:6;
+    background:repeating-linear-gradient(135deg,var(--amber) 0 14px,#0a110c 14px 29px);
+    opacity:.78;
+  }
+  .hazard-bottom{
+    position:absolute;bottom:0;left:0;right:0;height:10px;z-index:6;
+    background:repeating-linear-gradient(135deg,var(--rust) 0 12px,#0a110c 12px 26px);
+    opacity:.55;
+  }
+  .topline{
+    position:relative;z-index:3;
+    display:flex;align-items:center;justify-content:space-between;
+    padding-top:7px;
+    font-family:Georgia,serif;font-size:11px;letter-spacing:.28em;
+    color:rgba(230,211,169,.54);text-transform:uppercase;
+  }
+  .topline .left{display:flex;align-items:center;gap:15px;}
+  .sigil{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:23px;height:23px;border:1px solid rgba(231,181,102,.35);border-radius:50%;
+    color:var(--amber);font-family:"Segoe UI Symbol",sans-serif;font-size:14px;line-height:1;
+  }
+  .topline .right{display:flex;align-items:center;gap:12px;color:rgba(230,211,169,.28);}
+  .topline .rule{display:block;width:62px;height:1px;background:linear-gradient(90deg,rgba(231,181,102,.55),transparent);}
+  .title-wrap{
+    position:relative;z-index:4;
+    margin-top:26px;
+    min-height:235px;
+  }
+  .eyebrow{
+    display:flex;align-items:center;gap:14px;
+    font-size:12px;letter-spacing:.26em;color:rgba(225,208,167,.55);
+  }
+  .eyebrow .line{display:block;width:38px;height:1px;background:var(--amber);opacity:.7;}
+  h1{
+    position:relative;z-index:2;
+    margin:16px 0 0 -5px;
+    display:flex;align-items:flex-end;gap:28px;
+    font-family:var(--serif);font-weight:400;line-height:.8;
+  }
+  h1 .cn{
+    font-size:196px;letter-spacing:.03em;
+    background:linear-gradient(180deg,#fff8e8 3%,#eedab3 50%,#c28d60 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 7px 35px rgba(218,153,92,.15));
+  }
+  h1 .sub{
+    padding-bottom:22px;
+    font-family:var(--serif);font-size:29px;letter-spacing:.38em;
+    color:rgba(232,172,127,.85);white-space:nowrap;
+  }
+  .title-tag{
+    display:flex;align-items:center;gap:13px;
+    margin-top:20px;
+    font-family:var(--serif);font-size:21px;letter-spacing:.12em;
+    color:rgba(241,218,184,.78);
+  }
+  .title-tag .hazard-dot{
+    width:7px;height:7px;border-radius:50%;background:var(--rust);
+    box-shadow:0 0 15px rgba(214,110,81,.5);
+  }
+  .watermark{
+    position:absolute;right:36px;top:-28px;z-index:1;
+    font-family:"Segoe UI Symbol",sans-serif;font-size:456px;line-height:1;
+    color:rgba(201,220,170,.035);transform:rotate(-9deg);
+    pointer-events:none;
+  }
+  .side-note{
+    position:absolute;right:0;top:368px;z-index:5;
+    writing-mode:vertical-rl;text-align:right;
+    font-family:Georgia,serif;font-size:10px;letter-spacing:.33em;line-height:2.2;
+    color:rgba(228,207,168,.26);
+  }
+  .stamp{
+    position:absolute;right:2px;top:252px;z-index:5;
+    padding:9px 16px 8px;
+    border:2px solid rgba(214,110,81,.27);
+    transform:rotate(-7deg);
+    font-family:Georgia,serif;font-size:17px;letter-spacing:.2em;
+    color:rgba(219,126,99,.48);
+    text-align:center;
+  }
+  .stamp small{display:block;margin-top:3px;font-family:var(--sans);font-size:7px;letter-spacing:.18em;color:rgba(219,126,99,.28);}
+  .hero{
+    position:relative;z-index:3;
+    margin:14px 0 0;height:568px;
+    border:1px solid rgba(230,214,175,.18);
+    background:#07120e;overflow:hidden;
+  }
+  .hero img{
+    width:100%;height:100%;object-fit:cover;object-position:center 53%;
+    filter:brightness(1.18) contrast(1.07) saturate(1.08);
+    transform:scale(1.015);
+  }
+  .hero .shade{
+    position:absolute;inset:0;
+    background:
+      linear-gradient(180deg,rgba(2,8,6,.56),transparent 22%,transparent 64%,rgba(2,8,6,.88)),
+      linear-gradient(90deg,rgba(2,8,6,.28),transparent 35%,transparent 68%,rgba(2,9,7,.3));
+  }
+  .hero .scan{
+    position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(228,236,196,.035) 0 1px,transparent 1px 4px);
+    mix-blend-mode:overlay;opacity:.55;
+  }
+  .hero-label{
+    position:absolute;left:20px;top:18px;
+    font-family:Georgia,serif;font-size:10px;letter-spacing:.3em;
+    color:rgba(236,222,187,.64);
+  }
+  .hero-label b{font-weight:400;color:var(--green);}
+  .hero-code{
+    position:absolute;right:20px;top:15px;
+    font-family:Georgia,serif;font-size:11px;letter-spacing:.24em;
+    color:rgba(180,227,165,.6);
+  }
+  .hero-code strong{font-weight:400;color:var(--green);}
+  .hero-bottom{
+    position:absolute;left:20px;right:20px;bottom:16px;
+    display:flex;align-items:flex-end;justify-content:space-between;
+    font-family:Georgia,serif;font-size:9px;letter-spacing:.26em;color:rgba(233,222,191,.48);
+  }
+  .hero-bottom .tip{
+    font-family:var(--serif);font-size:14px;letter-spacing:.14em;color:rgba(246,233,205,.76);
+  }
+  .hero-bottom .tip em{font-style:normal;color:var(--rust);}
+  .corner{position:absolute;width:17px;height:17px;border-color:rgba(236,217,174,.52);border-style:solid;z-index:4;}
+  .corner.tl{left:9px;top:9px;border-width:1px 0 0 1px;}
+  .corner.tr{right:9px;top:9px;border-width:1px 1px 0 0;}
+  .corner.bl{left:9px;bottom:9px;border-width:0 0 1px 1px;}
+  .corner.br{right:9px;bottom:9px;border-width:0 1px 1px 0;}
+  .rules{
+    position:relative;z-index:4;
+    margin-top:25px;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:13px;
+  }
+  .rule-card{
+    min-height:176px;padding:15px 14px 14px;
+    border-top:1px solid var(--line);
+    background:linear-gradient(180deg,rgba(229,216,185,.035),rgba(0,0,0,0));
+    position:relative;
+  }
+  .rule-card:before{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,rgba(230,214,177,.1),transparent);}
+  .rule-card .no{
+    font-family:Georgia,serif;font-size:10px;letter-spacing:.18em;color:rgba(231,181,102,.55);
+  }
+  .rule-card h3{
+    margin:13px 0 9px;
+    font-family:var(--serif);font-weight:400;font-size:24px;letter-spacing:.06em;color:#f1e5ce;
+  }
+  .rule-card p{
+    margin:0;font-size:12px;line-height:1.9;letter-spacing:.03em;color:rgba(212,207,184,.61);
+  }
+  .rule-card p b{font-weight:500;color:var(--amber);}
+  .rule-card p em{font-style:normal;color:var(--green);}
+  .choice{
+    position:relative;z-index:4;
+    margin-top:22px;min-height:118px;
+    display:grid;grid-template-columns:196px 1fr 245px;
+    border:1px solid rgba(231,207,157,.15);
+    background:
+      linear-gradient(90deg,rgba(226,181,101,.1),rgba(226,181,101,.02) 28%,rgba(0,0,0,0) 72%),
+      rgba(9,22,16,.5);
+    overflow:hidden;
+  }
+  .choice:after{
+    content:"";position:absolute;left:0;right:0;bottom:0;height:4px;
+    background:repeating-linear-gradient(135deg,rgba(231,181,102,.7) 0 10px,transparent 10px 21px);
+    opacity:.35;
+  }
+  .choice .choice-no{
+    padding:19px 20px;border-right:1px solid rgba(231,207,157,.12);
+  }
+  .choice .choice-no span{
+    display:block;font-family:Georgia,serif;font-size:9px;letter-spacing:.26em;color:rgba(231,181,102,.5);
+  }
+  .choice .choice-no strong{
+    display:block;margin-top:7px;font-family:Georgia,serif;font-size:39px;font-weight:400;letter-spacing:.02em;color:#f0dfbd;line-height:1.1;
+  }
+  .choice .choice-no em{font-style:normal;color:var(--green);font-size:25px;}
+  .choice-main{padding:20px 24px;display:flex;flex-direction:column;justify-content:center;gap:7px;}
+  .choice-main h2{
+    margin:0;font-family:var(--serif);font-weight:400;font-size:28px;letter-spacing:.08em;color:#f6e8cd;
+  }
+  .choice-main p{margin:0;font-size:13px;line-height:1.75;letter-spacing:.03em;color:rgba(221,213,187,.66);}
+  .choice-main p b{font-weight:500;color:var(--rust);}
+  .choice-side{
+    padding:19px 20px;border-left:1px solid rgba(231,207,157,.1);
+    display:flex;flex-direction:column;justify-content:center;gap:6px;
+  }
+  .choice-side span{font-family:Georgia,serif;font-size:9px;letter-spacing:.2em;color:rgba(215,203,169,.38);}
+  .choice-side strong{font-family:var(--serif);font-size:19px;font-weight:400;letter-spacing:.04em;color:rgba(220,168,126,.9);}
+  .choice-side small{font-size:10px;line-height:1.6;letter-spacing:.03em;color:rgba(212,204,180,.46);}
+  .bottom{
+    position:relative;z-index:4;
+    margin-top:20px;display:grid;grid-template-columns:278px 1fr 176px;gap:27px;align-items:center;
+  }
+  .qr-card{
+    display:flex;align-items:center;gap:16px;
+    padding:10px;
+    background:rgba(238,227,201,.965);
+    color:#112017;
+    box-shadow:0 8px 30px rgba(0,0,0,.28);
+  }
+  .qr-card img{width:154px;height:154px;display:block;image-rendering:pixelated;}
+  .qr-copy{display:flex;flex-direction:column;justify-content:center;gap:5px;min-width:0;}
+  .qr-copy b{font-family:var(--serif);font-size:19px;font-weight:400;letter-spacing:.08em;line-height:1.25;}
+  .qr-copy span{font-family:Georgia,serif;font-size:7px;letter-spacing:.18em;color:rgba(17,32,23,.55);}
+  .qr-copy em{font-style:normal;font-size:9px;line-height:1.5;color:rgba(17,32,23,.67);}
+  .play-info{display:flex;flex-direction:column;gap:10px;min-width:0;}
+  .play-title{display:flex;align-items:center;gap:12px;font-family:Georgia,serif;font-size:9px;letter-spacing:.28em;color:rgba(231,181,102,.54);}
+  .play-title .line{width:48px;height:1px;background:rgba(231,181,102,.3);}
+  .play-url{
+    font-family:Georgia,var(--sans);font-size:21px;letter-spacing:.01em;color:rgba(239,226,196,.9);
+    overflow-wrap:anywhere;text-decoration:none;border-bottom:1px solid rgba(231,181,102,.28);width:max-content;max-width:100%;padding-bottom:4px;
+  }
+  .keys{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:2px;}
+  .keys span{display:flex;align-items:center;gap:7px;font-size:10px;color:rgba(218,210,184,.6);}
+  .key{
+    display:inline-flex;align-items:center;justify-content:center;min-width:27px;height:21px;padding:0 6px;
+    border:1px solid rgba(231,212,171,.24);border-radius:4px;
+    font-family:Georgia,var(--sans);font-size:9px;letter-spacing:.05em;color:rgba(244,232,200,.82);
+    background:rgba(239,224,185,.045);
+  }
+  .play-meta{font-family:var(--serif);font-size:12px;letter-spacing:.12em;color:rgba(211,201,174,.42);}
+  .mission{
+    border-left:1px solid rgba(231,207,157,.13);padding-left:21px;
+    display:flex;flex-direction:column;gap:7px;
+  }
+  .mission .small{font-family:Georgia,serif;font-size:8px;letter-spacing:.26em;color:rgba(219,204,169,.34);}
+  .mission .big{font-family:var(--serif);font-size:23px;line-height:1.25;letter-spacing:.08em;color:rgba(232,196,137,.86);}
+  .mission .hazard{
+    font-family:Georgia,serif;font-size:8px;letter-spacing:.17em;color:rgba(213,115,87,.6);
+    border-top:1px solid rgba(213,115,87,.2);padding-top:6px;margin-top:2px;
+  }
+  .milestones{
+    position:relative;z-index:4;
+    margin-top:16px;height:140px;
+    border-top:1px solid rgba(231,207,157,.12);
+    border-bottom:1px solid rgba(231,207,157,.08);
+    display:grid;grid-template-columns:300px 1fr;
+    background:linear-gradient(90deg,rgba(224,182,107,.035),transparent 40%);
+  }
+  .milestones .m-label{
+    padding:15px 20px;border-right:1px solid rgba(231,207,157,.09);
+    display:flex;flex-direction:column;justify-content:center;gap:5px;
+  }
+  .milestones .m-label span{font-family:Georgia,serif;font-size:7.5px;letter-spacing:.2em;color:rgba(231,181,102,.5);white-space:nowrap;}
+  .milestones .m-label strong{
+    font-family:var(--serif);font-size:17px;font-weight:400;letter-spacing:.06em;color:rgba(238,224,194,.84);line-height:1.45;white-space:nowrap;
+  }
+  .milestones .m-label em{font-style:normal;font-size:8.5px;letter-spacing:.04em;color:rgba(205,199,173,.42);}
+  .milestone-track{
+    position:relative;display:grid;grid-template-columns:repeat(3,1fr);align-items:center;padding:0 30px;
+  }
+  .milestone-track:before{
+    content:"";position:absolute;left:66px;right:66px;top:52px;height:1px;
+    background:linear-gradient(90deg,rgba(159,225,167,.2),rgba(231,181,102,.28),rgba(214,110,81,.3));
+  }
+  .milestone{position:relative;z-index:1;display:flex;flex-direction:column;gap:7px;padding-top:4px;}
+  .milestone .node{
+    width:31px;height:31px;border-radius:50%;
+    border:1px solid rgba(168,235,172,.32);
+    background:#0a1711;
+    display:flex;align-items:center;justify-content:center;
+    font-family:Georgia,serif;font-size:12px;color:rgba(174,234,173,.9);
+    box-shadow:0 0 0 7px rgba(6,16,11,.7);
+  }
+  .milestone:nth-child(2) .node{border-color:rgba(231,181,102,.38);color:var(--amber);}
+  .milestone:nth-child(3) .node{border-color:rgba(214,110,81,.38);color:#e38e75;}
+  .milestone b{font-family:var(--serif);font-size:16px;font-weight:400;letter-spacing:.06em;color:rgba(240,226,199,.8);}
+  .milestone span{font-size:9px;letter-spacing:.03em;color:rgba(203,199,174,.45);}
+  .milestone span em{font-style:normal;color:rgba(230,182,103,.7);}
+  .footer{
+    position:relative;z-index:4;
+    margin-top:14px;display:flex;justify-content:space-between;align-items:center;
+    font-family:Georgia,var(--sans);font-size:8px;letter-spacing:.18em;color:rgba(215,201,167,.28);
+  }
+  .footer .mid{font-family:var(--serif);letter-spacing:.14em;color:rgba(215,201,167,.38);}
+  .footer .red{color:rgba(214,110,81,.5);}
+</style>
+</head>
+<body>
+<div class="poster">
+  <div class="hazard-top"></div>
+  <div class="hazard-bottom"></div>
+  <div class="watermark">☣</div>
+
+  <header class="topline">
+    <div class="left"><span class="sigil">☣</span><span>QUARANTINE / DAY 47</span><span class="rule"></span><span>单页互动作品 · CANVAS 2D</span></div>
+    <div class="right"><span>NO SIGNAL</span><span>·</span><span>NO EVAC</span></div>
+  </header>
+
+  <section class="title-wrap">
+    <div class="eyebrow"><span class="line"></span><span>一个关于收集、异变与取舍的末日小作品</span></div>
+    <h1><span class="cn">拾光者</span><span class="sub">感染区</span></h1>
+    <div class="title-tag"><span class="hazard-dot"></span>你捡起的每一束光，都会把尸群引来。</div>
+  </section>
+
+  <div class="stamp">NO EVAC<small>AUTHORIZED PERSONNEL ONLY</small></div>
+  <div class="side-note">AFTERGLOW / A SMALL GAME ABOUT LIGHT<br>ESCAPE IS NOT A PROMISE</div>
+
+  <figure class="hero">
+    <img src="hero-action.png" alt="《拾光者·感染区》游戏实机画面：拾光者提着灯，在感染者包围中收集红色样本">
+    <div class="shade"></div>
+    <div class="scan"></div>
+    <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+    <div class="hero-label">IN-GAME / <b>实机画面</b></div>
+    <div class="hero-code">EVAC <strong>// 08</strong></div>
+    <div class="hero-bottom">
+      <div class="tip">越亮，越自由。<em>也越危险。</em></div>
+      <div>SAMPLE RUN · QUARANTINE DISTRICT</div>
+    </div>
+  </figure>
+
+  <section class="rules">
+    <article class="rule-card">
+      <div class="no">01 / 撤离目标</div>
+      <h3>带回 8 支</h3>
+      <p>蓝色抗体 <b>+1</b>，红色活性样本 <b>+2</b>。把光带进东北角的 <em>H 停机坪</em>。</p>
+    </article>
+    <article class="rule-card">
+      <div class="no">02 / 异变</div>
+      <h3>收集会改变你</h3>
+      <p><b>3 支</b>荧光共生，移动更快；<b>6 支</b>临界暴走，解锁冲刺。越亮，也越不像人。</p>
+    </article>
+    <article class="rule-card">
+      <div class="no">03 / 光影法则</div>
+      <h3>越亮，影越近</h3>
+      <p>携带样本越多，感染者的感知范围越远。被扑中会掉落 <b>1 支</b>样本，可返回捡起。</p>
+    </article>
+    <article class="rule-card">
+      <div class="no">04 / 操作</div>
+      <h3>活着走出去</h3>
+      <p><b>WASD</b> 移动，<b>Shift</b> 暴走，<b>E</b> 撤离。<br>利用围栏与车辆切断视线。</p>
+    </article>
+  </section>
+
+  <section class="choice">
+    <div class="choice-no">
+      <span>THE ONLY CHOICE</span>
+      <strong>4 <em>+</em> 3</strong>
+    </div>
+    <div class="choice-main">
+      <h2>先闯哪一个隔离区？</h2>
+      <p>全场只有 <b>4 支蓝色</b> + <b>3 支红色</b>。想凑够 8 支，至少要冒险进入 <b>两个红色隔离区</b>。先拿哪里、什么时候变亮，由你决定。</p>
+    </div>
+    <div class="choice-side">
+      <span>THE RULE</span>
+      <strong>光越亮，感染者越远就能看见你。</strong>
+      <small>路线、顺序、取舍，比手速更重要。</small>
+    </div>
+  </section>
+
+  <section class="bottom">
+    <div class="qr-card">
+      <img src="qr.png" alt="扫码进入《拾光者·感染区》">
+      <div class="qr-copy">
+        <b>扫码进入<br>感染区</b>
+        <span>SCAN TO PLAY</span>
+        <em>手机 / 电脑浏览器<br>无需安装</em>
+      </div>
+    </div>
+    <div class="play-info">
+      <div class="play-title"><span class="line"></span><span>PLAY THE GAME / 在线试玩</span></div>
+      <a class="play-url" href="https://nanci101.github.io/lumenfall/">nanci101.github.io/lumenfall/</a>
+      <div class="keys">
+        <span><i class="key">WASD</i>移动</span>
+        <span><i class="key">Shift</i>暴走</span>
+        <span><i class="key">E</i>撤离</span>
+        <span><i class="key">M</i>静音</span>
+      </div>
+      <div class="play-meta">单人 · 约 4 分钟 · 桌面与触屏 · 无需下载</div>
+    </div>
+    <div class="mission">
+      <div class="small">CURRENT MISSION</div>
+      <div class="big">带光<br>去停机坪</div>
+      <div class="hazard">☣ SAMPLE ATTRACTS THE INFECTED</div>
+    </div>
+  </section>
+
+  <section class="milestones">
+    <div class="m-label">
+      <span>THE LIGHT TAKES YOU / 光的三个阶段</span>
+      <strong>收集，会改写你的身体。</strong>
+      <em>能力与危险，同时生长。</em>
+    </div>
+    <div class="milestone-track">
+      <div class="milestone">
+        <div class="node">03</div>
+        <b>荧光共生</b>
+        <span>移动提速 · 血管与背包透出冷光</span>
+      </div>
+      <div class="milestone">
+        <div class="node">06</div>
+        <b>临界暴走</b>
+        <span>解锁 <em>Shift</em> 冲刺 · 菌丝与琥珀色变异</span>
+      </div>
+      <div class="milestone">
+        <div class="node">08</div>
+        <b>撤离信号</b>
+        <span>满月形态 · H 停机坪与绿色信标亮起</span>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>DESIGN &amp; CODE / NANCI101</span>
+    <span class="mid">TRAE · AI CODING · 2026</span>
+    <span class="red">SURVIVE THE LIGHT.</span>
+  </footer>
+</div>
+</body>
+</html>
