@@ -1,12 +1,12 @@
 <!doctype html>
-<!-- 《拾光者·感染区》离线单文件版；所有 CSS / JS 已内联，可直接双击打开。 -->
+<!-- 《禁区提灯·感染区》离线单文件版；所有 CSS / JS 已内联，可直接双击打开。 -->
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#060f0d">
-  <meta name="description" content="《拾光者·感染区》—— 在封锁区收集荧光抗体样本，样本越亮能力越强，感染者也会从更远处发现你。带 8 支样本抵达撤离点。">
-  <title>拾光者 · 感染区</title>
+  <meta name="description" content="《禁区提灯·感染区》—— 在封锁区收集荧光抗体样本，样本越亮能力越强，感染者也会从更远处发现你。带 8 支样本抵达撤离点。">
+  <title>禁区提灯 · 感染区</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23081210'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%23b9d69b' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='4' fill='%23f1c07d'/%3E%3Cpath d='M32 14v12M32 38v12M15 25l11 6M38 34l11 6M15 39l11-6M38 30l11-6' stroke='%23b9d69b' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
   <style>
 :root{
@@ -822,13 +822,13 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
 </head>
 <body>
   <div id="app">
-    <main id="stage" aria-label="拾光者·感染区 游戏画面">
+    <main id="stage" aria-label="禁区提灯·感染区 游戏画面">
       <canvas id="game" width="1280" height="720" aria-label="感染区游戏场景"></canvas>
 
       <div id="uiLayer">
         <div id="hud" class="hidden" aria-live="polite">
           <div class="status-card">
-            <div class="brand-mini"><span class="brand-cn">拾光者</span><span class="brand-en">QUARANTINE / DAY 47</span></div>
+            <div class="brand-mini"><span class="brand-cn">禁区提灯</span><span class="brand-en">QUARANTINE / DAY 47</span></div>
             <div class="light-block">
               <div class="light-numbers">
                 <span class="light-label">携带样本</span>
@@ -910,10 +910,10 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
           <div class="title-left">
             <div class="eyebrow"><span class="eyebrow-line"></span>隔离区第 47 天 · 一个关于收集与尸群的小作品</div>
             <h1 class="game-title">
-              <span class="title-main">拾光者</span>
+              <span class="title-main">禁区提灯</span>
               <span class="title-sub">感染区</span>
             </h1>
-            <p class="tagline">你捡起的每一束光，都会把尸群引来。</p>
+            <p class="tagline">你点亮的每一束光，都会把尸群引来。</p>
 
             <div class="rules-grid">
               <article class="rule-card">
@@ -1022,7 +1022,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
         </div>
 
         <div id="bootVeil" class="boot-veil">
-          <div class="boot-mark">拾光者</div>
+          <div class="boot-mark">禁区提灯</div>
           <div class="boot-line"><span></span></div>
         </div>
       </div>
@@ -1034,7 +1034,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
   'use strict';
 
   /* ============================================================
-     拾光者 · 感染区
+     禁区提灯 · 感染区
      QUARANTINE / DAY 47
      一个不依赖外部素材的 Canvas 俯视角收集游戏。
      ============================================================ */
@@ -1503,7 +1503,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
         master.gain.linearRampToValueAtTime(m ? 0 : 0.85, ac.currentTime + 0.25);
       }
       if (!silent) {
-        try { localStorage.setItem('lumenfall-muted', m ? '1' : '0'); } catch (e) {}
+        try { localStorage.setItem('lantern-zone-muted', m ? '1' : '0'); } catch (e) {}
       }
     }
 
@@ -5686,7 +5686,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
 
   function init() {
     try {
-      state.muted = localStorage.getItem('lumenfall-muted') === '1';
+      state.muted = localStorage.getItem('lantern-zone-muted') === '1';
     } catch (e) {}
     dom.soundBtn.classList.toggle('is-muted', state.muted);
     const params = new URLSearchParams(location.search);

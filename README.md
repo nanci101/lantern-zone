@@ -1,16 +1,16 @@
-# 拾光者 · 感染区
+# 禁区提灯 · 感染区
 
-> **你捡起的每一束光，都会把尸群引来。**
+> **你点亮的每一束光，都会把尸群引来。**
 
-一个以“收集”为核心的丧尸末日题材单页互动作品。你是一只提着灯的拾光者，在封锁区里收集荧光抗体样本；样本让你跑得更快、变得更强，也让感染者从更远处发现你。
+一个以“收集”为核心的丧尸末日题材单页互动作品。你是一个提着灯的幸存者，在封锁区里收集荧光抗体样本；样本让你跑得更快、变得更强，也让感染者从更远处发现你。
 
 **目标：带 8 支样本抵达东北角的 H 停机坪，按 `E` 呼叫救援。**
 
-[![试玩](https://img.shields.io/badge/PLAY-进入感染区-a5e5a7?style=for-the-badge)](https://nanci101.github.io/lumenfall/)
+[![试玩](https://img.shields.io/badge/PLAY-进入感染区-a5e5a7?style=for-the-badge)](https://nanci101.github.io/lantern-zone/)
 [![海报](https://img.shields.io/badge/POSTER-A2%20海报-e7b566?style=for-the-badge)](poster/poster.png)
 
-- **在线试玩：** <https://nanci101.github.io/lumenfall/>
-- **GitHub 仓库：** <https://github.com/nanci101/lumenfall>
+- **在线试玩：** <https://nanci101.github.io/lantern-zone/>
+- **GitHub 仓库：** <https://github.com/nanci101/lantern-zone>
 - **可打印海报：** [poster/poster.pdf](poster/poster.pdf)
 - **离线单文件：** [standalone.html](standalone.html)
 
@@ -73,7 +73,7 @@ A2 海报：
 ## 项目结构
 
 ```text
-lumenfall/
+lantern-zone/
 ├─ index.html                 # 进入感染区
 ├─ style.css                  # 标题、HUD、弹层、触屏界面
 ├─ game.js                    # Canvas 2D 游戏逻辑与画面生成

@@ -2,7 +2,7 @@
   'use strict';
 
   /* ============================================================
-     拾光者 · 感染区
+     禁区提灯 · 感染区
      QUARANTINE / DAY 47
      一个不依赖外部素材的 Canvas 俯视角收集游戏。
      ============================================================ */
@@ -471,7 +471,7 @@
         master.gain.linearRampToValueAtTime(m ? 0 : 0.85, ac.currentTime + 0.25);
       }
       if (!silent) {
-        try { localStorage.setItem('lumenfall-muted', m ? '1' : '0'); } catch (e) {}
+        try { localStorage.setItem('lantern-zone-muted', m ? '1' : '0'); } catch (e) {}
       }
     }
 
@@ -4654,7 +4654,7 @@
 
   function init() {
     try {
-      state.muted = localStorage.getItem('lumenfall-muted') === '1';
+      state.muted = localStorage.getItem('lantern-zone-muted') === '1';
     } catch (e) {}
     dom.soundBtn.classList.toggle('is-muted', state.muted);
     const params = new URLSearchParams(location.search);
