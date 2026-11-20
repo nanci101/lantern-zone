@@ -14,6 +14,8 @@
 - **可打印海报：** [poster/poster.pdf](poster/poster.pdf)
 - **离线单文件：** [standalone.html](standalone.html)
 
+> 如果所在网络打不开 `github.io`：直接双击 / 分发 `standalone.html` 即可离线游玩；也可以在项目目录运行 `python -m http.server 5080`，用本机地址进入。
+
 推荐使用桌面浏览器；手机横屏也可以玩，右下“暴走”按钮在 6 支样本后解锁。
 
 ## 为什么是丧尸，为什么不是三关
