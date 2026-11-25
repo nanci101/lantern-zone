@@ -111,13 +111,23 @@
 
 `play.xhtml` 是把 `index.html`、CSS 与 JS 全部内联后转成的 XHTML 单文件。jsDelivr 对 `.xhtml` 返回 `application/xhtml+xml`，浏览器会按 XHTML 解析并执行脚本，因此手机可以直接打开，不需要服务器。
 
-本地验证：
+实际验证：
 
-- 响应：`HTTP 200`，`Content-type: application/xhtml+xml`；
-- 手机视口 844 × 390：手机开始页显示，点击“横屏开始”进入 `playing`；
-- 触控控件显示，页面无 pageerror。
+- 本地响应：`HTTP 200`，`Content-type: application/xhtml+xml`；
+- CDN 响应：`HTTP 200`，`Content-type: application/xhtml+xml`，241,937 bytes；
+- 手机视口 844 × 390：手机开始页显示，点击“横屏开始”进入游戏；
+- 触控控件显示；在 CDN 版本上按右方向 800ms，玩家 x 从 260 → 406（+146px）；
+- 页面无 pageerror，无失败请求。
 
-最终二维码指向 jsDelivr 上的这个文件；海报渲染后会做二维码解码 + 手机视口打开验证。
+### 3.7 最终海报二维码 / 扫码验证
+
+- 最终海报二维码内容：`https://tinyurl.com/2aqh6kln`
+- 用 OpenCV 对最终 2480 × 3508 的 `poster.png` 解码，识别出上述短链；
+- 在手机视口打开该短链：TinyURL 301 → `cdn.jsdelivr.net/.../play.xhtml` → `application/xhtml+xml`；
+- 页面标题为「禁区提灯 · 感染区」，显示手机开始页；点击“横屏开始”后触控控件显示且可移动；
+- 页面无 pageerror。
+
+截图：`playtest/qr-scan-title.png`、`playtest/qr-scan-game.png`。
 
 ## 4. 发现的问题与修复
 
@@ -174,9 +184,10 @@
 
 - 手机全屏按钮依赖浏览器 Fullscreen API；iPhone Safari 不支持任意元素全屏，需要手动旋转横屏。
 - 本作没有战斗与存档，刷新会从头开始。
-- 守点阶段给测试脚本开启过无敌，用来单独验证 25 秒计时；人类试玩时仍会被扑中并掉落样本。
+- 守点阶段给流程回归脚本开启过无敌，用来单独验证 25 秒计时；无敌守点另做失败/暂停测试，人类试玩时仍会被扑中并掉落样本。
 - 课堂第一次试玩建议先拿蓝样本、再去病房拿授权卡，最后选两个红区。
-- `github.io` 在部分网络不可达，因此海报二维码指向 jsDelivr 的 `play.xhtml` 镜像；GitHub Pages 仍保留作为仓库主页。
+- `github.io` 在部分网络不可达，因此海报二维码先跳 TinyURL 短链，再跳 jsDelivr 的 XHTML 单文件镜像；GitHub Pages 仍保留作为仓库主页。
+- 手机测试使用 Edge 移动设备仿真 + PointerEvent；真实手机（尤其 iOS Safari）的字体、全屏和振动反馈可能略有差异。
 
 ## 6. 截图索引
 
@@ -190,4 +201,5 @@
 - `playtest/mobile-evac.png`：手机 25 秒守点
 - `playtest/mobile-pause.png`：手机暂停页
 - `playtest/mobile-portrait.png`：竖屏旋转提示
+- `playtest/qr-scan-title.png` / `qr-scan-game.png`：从最终短链打开的 CDN 手机页
 - `playtest/rule-low.png` / `rule-high.png`：不同样本数下的感知范围

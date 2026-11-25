@@ -6,10 +6,11 @@
 
 **目标：先在病房拿到撤离授权卡，带 8 支样本抵达东北角的 H 停机坪，在停机坪坚持 25 秒等直升机落地。**
 
-[![手机试玩](https://img.shields.io/badge/PLAY-手机横屏试玩-a5e5a7?style=for-the-badge)](https://cdn.jsdelivr.net/gh/nanci101/lantern-zone@main/play.xhtml)
+[![手机试玩](https://img.shields.io/badge/PLAY-手机横屏试玩-a5e5a7?style=for-the-badge)](https://tinyurl.com/2aqh6kln)
 [![海报](https://img.shields.io/badge/POSTER-A2%20海报-e7b566?style=for-the-badge)](poster/poster.png)
 
-- **手机试玩（推荐，单文件 XHTML CDN）：** <https://cdn.jsdelivr.net/gh/nanci101/lantern-zone@main/play.xhtml>
+- **手机试玩（海报二维码同址）：** <https://tinyurl.com/2aqh6kln>
+- **完整 CDN 地址：** <https://cdn.jsdelivr.net/gh/nanci101/lantern-zone@main/play.xhtml>
 - **GitHub Pages：** <https://nanci101.github.io/lantern-zone/>
 - **GitHub 仓库：** <https://github.com/nanci101/lantern-zone>
 - **可打印海报：** [poster/poster.pdf](poster/poster.pdf)
@@ -17,7 +18,7 @@
 
 > 手机请横屏，点“横屏开始”。左侧圆盘拖动移动，右侧“暴走”/“检查控制台”。进入游戏后，右上角 `⛶` 可全屏。
 >
-> 如果所在网络打不开 `github.io`，用上面的 jsDelivr 试玩地址；也可以直接双击 / 分发 `standalone.html` 离线游玩。
+> 海报二维码与短链先跳到 jsDelivr 的 XHTML 单文件版；如果所在网络打不开 `github.io`，用手机试玩短链；也可以直接双击 / 分发 `standalone.html` 离线游玩。
 
 **作者：** nanci101 · **类型：** 单人收集 / 潜行 · **时长：** 约 5 分钟
 
