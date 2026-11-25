@@ -6,11 +6,11 @@
 
 **目标：先在病房拿到撤离授权卡，带 8 支样本抵达东北角的 H 停机坪，在停机坪坚持 25 秒等直升机落地。**
 
-[![手机试玩](https://img.shields.io/badge/PLAY-手机横屏试玩-a5e5a7?style=for-the-badge)](https://fastly.jsdelivr.net/gh/nanci101/lantern-zone@main/play-light.xhtml)
+[![手机试玩](https://img.shields.io/badge/PLAY-手机横屏试玩-a5e5a7?style=for-the-badge)](https://fastly.jsdelivr.net/gh/nanci101/lantern-zone@main/play-mobile.xhtml)
 [![海报](https://img.shields.io/badge/POSTER-A2%20海报-e7b566?style=for-the-badge)](poster/poster.png)
 
-- **手机试玩（海报二维码同址，单文件 XHTML）：** <https://fastly.jsdelivr.net/gh/nanci101/lantern-zone@main/play-light.xhtml>
-- **备用 CDN（cdn.jsdelivr 有时不可达）：** <https://gcore.jsdelivr.net/gh/nanci101/lantern-zone@main/play-light.xhtml>
+- **手机试玩（海报二维码同址，单文件 XHTML）：** <https://fastly.jsdelivr.net/gh/nanci101/lantern-zone@main/play-mobile.xhtml>
+- **备用 CDN（cdn.jsdelivr 有时不可达）：** <https://gcore.jsdelivr.net/gh/nanci101/lantern-zone@main/play-mobile.xhtml>
 - **GitHub Pages：** <https://nanci101.github.io/lantern-zone/>
 - **GitHub 仓库：** <https://github.com/nanci101/lantern-zone>
 - **可打印海报：** [poster/poster.pdf](poster/poster.pdf)
@@ -93,7 +93,8 @@ lantern-zone/
 ├─ style.css                  # 标题、HUD、弹层、触屏界面
 ├─ game.js                    # Canvas 2D 游戏逻辑与画面生成
 ├─ standalone.html            # 离线单文件版（CSS/JS 已内联）
-├─ play.xhtml                 # 手机 CDN 版（XHTML，适合 jsDelivr）
+├─ play.xhtml                 # 通用 XHTML 单文件版
+├─ play-mobile.xhtml          # 手机优化版（低分辨率 + 灯域裁剪 + 减特效）
 ├─ poster/
 │  ├─ poster.png              # A2 海报（2480 × 3508，提灯主体插画）
 │  ├─ poster.pdf              # 可打印 PDF
@@ -119,7 +120,9 @@ python -m http.server 5077
 - Canvas 2D 实时绘制，Web Audio 合成音效。
 - **提灯黑场**：Canvas 在场景上叠加程序化径向遮罩，只有玩家周围被暖光照亮；灯域随样本平滑扩大，并在拾取时脉冲扩散。
 - 响应式 16:9 舞台；手机横屏下使用加大的触控圆盘、暴走键、全屏按钮与守点 HUD。
-- 移动端把渲染 DPR 限制为 1，避免高 DPI 手机上 Canvas 过重；实测在 844×390 触控视口下可保持实时速度。
+- 移动端渲染缩放为 **0.62**（793 × 446 缓冲区），并只绘制提灯附近的灯光、僵尸、样本和粒子；雨、尘埃、视锥采样与粒子数量同步减少。
+- 移动端关闭整屏雾/噪点合成，使用 `alpha:false` / `desynchronized` Canvas；低帧率下 `dt` 上限放宽到 0.1，游戏时间不会变成慢动作。
+- 实测 844×390 触控视口，在 CPU 降速 4×/6× 下游戏时间仍为 **1.02 秒 / 1 秒真实时间**。
 - `play.xhtml` 是内联 CSS/JS 的 XHTML 单文件版，通过 jsDelivr CDN 提供可直接打开的试玩页。
 - GitHub Pages 静态部署；离线版 `standalone.html`。
 
