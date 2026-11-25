@@ -318,7 +318,7 @@
     statCaught: $('statCaught'), statCollect: $('statCollect')
   };
 
-  const ctx = dom.canvas.getContext('2d', { alpha: false, desynchronized: true });
+  const ctx = dom.canvas.getContext('2d', { alpha: false });
   let DPR = 1;
   let LOW_POWER = false;
   let terrain = null;
@@ -3631,8 +3631,8 @@
   const rain = [];
   const motes = [];
   function initWeather() {
-    const rainCount = LOW_POWER ? 46 : 135;
-    const moteCount = LOW_POWER ? 16 : 54;
+    const rainCount = LOW_POWER ? 32 : 135;
+    const moteCount = LOW_POWER ? 12 : 54;
     for (let i = 0; i < rainCount; i++) {
       rain.push({
         x: Math.random() * W,
@@ -4823,7 +4823,7 @@
     ctx.save();
     ctx.strokeStyle = 'rgba(172,207,182,.14)';
     for (let i = 0; i < rain.length; i++) {
-      if (LOW_POWER && i > 46) break;
+      if (LOW_POWER && i > 32) break;
       const d = rain[i];
       ctx.globalAlpha = d.alpha;
       ctx.lineWidth = d.width;
@@ -4974,20 +4974,23 @@
   let frameTime = 0;
 
   function loop(now) {
+    requestAnimationFrame(loop);
+    // Phones: cap at ~30fps. A 120Hz screen would otherwise render the
+    // full Canvas scene 120 times per second and make the device hot/stutter.
+    if (LOW_POWER && now - last < 1000 / 30 - 1) return;
     const dt = Math.min(LOW_POWER ? 0.1 : 0.05, (now - last) / 1000);
     last = now;
     frameTime = now / 1000;
     update(dt);
     updateRain(dt);
     render(frameTime);
-    requestAnimationFrame(loop);
   }
 
   function resize() {
     const coarse = isCoarse();
     LOW_POWER = coarse && window.innerWidth < 1100;
     document.body.classList.toggle('touch-mode', coarse);
-    DPR = LOW_POWER ? 0.62 : Math.min(2, window.devicePixelRatio || 1);
+    DPR = LOW_POWER ? 0.55 : Math.min(2, window.devicePixelRatio || 1);
     dom.canvas.width = Math.floor(W * DPR);
     dom.canvas.height = Math.floor(H * DPR);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
