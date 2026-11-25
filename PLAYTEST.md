@@ -109,14 +109,15 @@
 
 ### 3.6 XHTML / 二维码承载页
 
-`play.xhtml` 是把 `index.html`、CSS 与 JS 全部内联后转成的 XHTML 单文件。jsDelivr 对 `.xhtml` 返回 `application/xhtml+xml`，浏览器会按 XHTML 解析并执行脚本，因此手机可以直接打开，不需要服务器。
+`play.xhtml` / `play-light.xhtml` 是把 `index.html`、CSS 与 JS 全部内联后转成的 XHTML 单文件。jsDelivr 对 `.xhtml` 返回 `application/xhtml+xml`，浏览器会按 XHTML 解析并执行脚本，因此手机可以直接打开，不需要服务器。
 
 实际验证：
 
 - 本地响应：`HTTP 200`，`Content-type: application/xhtml+xml`；
-- CDN 响应：`HTTP 200`，`Content-type: application/xhtml+xml`，241,937 bytes；
+- CDN 响应：`HTTP 200`，`Content-type: application/xhtml+xml`，245,871 bytes（fastly.jsdelivr.net，`play-light.xhtml`，避免旧缓存）；
 - 手机视口 844 × 390：手机开始页显示，点击“横屏开始”进入游戏；
 - 触控控件显示；在 CDN 版本上按右方向 800ms，玩家 x 从 260 → 406（+146px）；
+- 提灯 HUD 初始为 150px；
 - 页面无 pageerror，无失败请求。
 
 ### 3.7 提灯黑场与灯域扩大
@@ -139,10 +140,10 @@
 ### 3.8 最终海报二维码 / 扫码验证
 
 - 海报版本：**以提灯为主体的插画版**，不再使用游戏界面截图；
-- 最终海报二维码内容：`https://tinyurl.com/2aqh6kln`；
-- 用 OpenCV 对最终 2480 × 3508 的 `poster.png` 做二维码解码（海报左侧 QR 区域），识别出上述短链；
-- 在手机视口打开该短链：TinyURL 301 → `cdn.jsdelivr.net/.../play.xhtml` → `application/xhtml+xml`；
-- 页面标题为「禁区提灯 · 感染区」，显示手机开始页；点击“横屏开始”后触控控件显示且可移动；
+- 最终海报二维码内容：`https://fastly.jsdelivr.net/gh/nanci101/lantern-zone@main/play-light.xhtml`；
+- 用 OpenCV 对最终 2480 × 3508 的 `poster.png` 做二维码解码（海报左侧 QR 区域），识别出上述直链；
+- 在手机视口打开该链接：`application/xhtml+xml`；
+- 页面标题为「禁区提灯 · 感染区」，显示手机开始页；点击“横屏开始”后触控控件显示，提灯范围显示 150px；
 - 页面无 pageerror。
 
 截图：`playtest/qr-scan-title.png`、`playtest/qr-scan-game.png`。
@@ -218,7 +219,9 @@
 - 本作没有战斗与存档，刷新会从头开始。
 - 守点阶段给流程回归脚本开启过无敌，用来单独验证 25 秒计时；无敌守点另做失败/暂停测试，人类试玩时仍会被扑中并掉落样本。
 - 课堂第一次试玩建议先拿蓝样本、再去病房拿授权卡，最后选两个红区。
-- `github.io` 在部分网络不可达，因此海报二维码先跳 TinyURL 短链，再跳 jsDelivr 的 XHTML 单文件镜像；GitHub Pages 仍保留作为仓库主页。
+- `github.io` 在部分网络不可达，因此海报二维码直接指向 fastly.jsdelivr.net 的 XHTML 单文件镜像；GitHub Pages 仍保留作为仓库主页。
+- 公网短链（v.gd / da.gd）会插入安全提示页，不适合作为扫码后的直接游戏入口，因此最终海报改用直链。
+- 新增的 `play-light.xhtml` 是独立文件名，避免 jsDelivr 对旧 `play.xhtml` 的缓存；以后更新游戏时建议换新文件名。
 - 手机测试使用 Edge 移动设备仿真 + PointerEvent；真实手机（尤其 iOS Safari）的字体、全屏和振动反馈可能略有差异。
 - 黑场会显著改变首次游玩的可见性：课堂第一次试玩建议先沿公路找蓝色样本，再进病房拿授权卡，不要一开始就横穿全图。
 
