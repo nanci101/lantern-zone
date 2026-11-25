@@ -300,6 +300,7 @@
     lightNow: $('lightNow'), lightPips: $('lightPips'),
     silverCount: $('silverCount'), goldCount: $('goldCount'),
     keycardRow: $('keycardRow'), keycardState: $('keycardState'),
+    lanternRange: $('lanternRange'),
     dangerBars: $('dangerBars'), dangerWord: $('dangerWord'), dangerBlock: $('dangerBlock'),
     objectiveText: $('objectiveText'), alertBanner: $('alertBanner'),
     evacHud: $('evacHud'), evacTimeLabel: $('evacTimeLabel'),
@@ -340,6 +341,8 @@
     caught: 0,
     form: 0,
     keycard: false,
+    lightRadius: 150,
+    lightPulse: 0,
     evacActive: false,
     evacTime: EVAC_HOLD,
     evacInside: false,
@@ -2589,6 +2592,8 @@
     state.caught = 0;
     state.form = 0;
     state.keycard = false;
+    state.lightRadius = 150;
+    state.lightPulse = 0;
     state.evacActive = false;
     state.evacTime = EVAC_HOLD;
     state.evacInside = false;
@@ -2838,6 +2843,7 @@
       return;
     }
     haptic(p.type === 'red' ? 22 : 12);
+    state.lightPulse = 1;
     const old = state.samples;
     const oldForm = state.form;
     state.samples += p.value;
@@ -3184,7 +3190,7 @@
       }
     }
 
-    const wantCard = state.samples >= GOAL && !state.keycard && !state.nearGate;
+    const wantCard = !state.keycard && !state.nearGate;
     const showWay = (ready || wantCard) && !state.nearGate && state.phase === 'playing';
     dom.wayfinder.classList.toggle('hidden', !showWay);
     if (showWay) {
@@ -3354,6 +3360,8 @@
 
     state.elapsed += dt;
     state.form = formFor(state.samples);
+    state.lightRadius = damp(state.lightRadius, lanternTarget(), 5, dt);
+    state.lightPulse = Math.max(0, state.lightPulse - dt * 1.9);
     updatePlayer(dt);
     updateZombies(dt);
     updatePickups(dt);
@@ -3370,6 +3378,58 @@
   function dangerLevel() {
     if (state.anyChase) return 5;
     return clamp(1 + Math.floor(Math.min(10, state.samples) / 1.8), 1, 5);
+  }
+
+  function lanternTarget() {
+    return 150 + Math.min(8, state.samples) * 15;
+  }
+
+  function drawLanternDarkness(camX, camY, shx, shy, time) {
+    const sx = player.x - camX + shx;
+    const sy = player.y - camY + shy - 14;
+    const r = state.lightRadius + state.lightPulse * 14;
+    const flicker = 1 + Math.sin(time * 7.1) * 0.012 + Math.sin(time * 2.3) * 0.008;
+
+    ctx.save();
+    const dark = ctx.createRadialGradient(sx, sy, r * 0.2, sx, sy, r * 1.0);
+    dark.addColorStop(0, 'rgba(0,2,2,0)');
+    dark.addColorStop(0.42, 'rgba(0,2,3,.03)');
+    dark.addColorStop(0.66, 'rgba(0,2,3,.26)');
+    dark.addColorStop(0.82, 'rgba(0,1,2,.68)');
+    dark.addColorStop(0.93, 'rgba(0,1,2,.92)');
+    dark.addColorStop(1, 'rgba(0,1,2,.965)');
+    ctx.fillStyle = dark;
+    ctx.fillRect(0, 0, W, H);
+
+    // Warm lantern falloff: the lit circle reads as one pool, not a flat hole.
+    ctx.globalCompositeOperation = 'screen';
+    const warm = ctx.createRadialGradient(sx, sy, 0, sx, sy, r * 0.86);
+    warm.addColorStop(0, `rgba(255,195,112,${0.13 * flicker})`);
+    warm.addColorStop(0.3, `rgba(247,168,86,${0.075 * flicker})`);
+    warm.addColorStop(0.66, 'rgba(209,118,53,.028)');
+    warm.addColorStop(1, 'rgba(209,118,53,0)');
+    ctx.fillStyle = warm;
+    ctx.fillRect(0, 0, W, H);
+
+    // A barely visible edge tells the player where the light ends.
+    const pulse = 0.5 + 0.5 * Math.sin(time * 2.4);
+    ctx.strokeStyle = `rgba(247,199,129,${0.055 + 0.025 * pulse + state.lightPulse * 0.12})`;
+    ctx.lineWidth = 1.1;
+    ctx.setLineDash([5, 12]);
+    ctx.beginPath();
+    ctx.arc(sx, sy, r * 0.93, 0, TAU);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // If the light expands, a brief amber ring travels outward.
+    if (state.lightPulse > 0.01) {
+      ctx.strokeStyle = `rgba(255,197,119,${state.lightPulse * 0.22})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(sx, sy, r * (1.05 + (1 - state.lightPulse) * 0.14), 0, TAU);
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 
   function updateHUD(force = false) {
@@ -3398,6 +3458,9 @@
     if (changed('keycard', state.keycard)) {
       dom.keycardRow.classList.toggle('has-card', state.keycard);
       dom.keycardState.textContent = state.keycard ? '已取得' : '未取得';
+    }
+    if (changed('lantern', Math.round(lanternTarget()))) {
+      dom.lanternRange.textContent = String(Math.round(lanternTarget()));
     }
 
     const lvl = dangerLevel();
@@ -3493,7 +3556,7 @@
     }, 560);
     setTimeout(() => {
       if (state.phase === 'playing') {
-        toast('隔离区第 47 天', '先去病房找撤离授权卡，再收集 8 支样本。样本越亮，感染者越远就能发现你。', { tone: 'story', icon: '☣', duration: 5600 });
+        toast('隔离区第 47 天', '提灯只照亮身边。每捡一支样本，灯域会扩大；但感染者也会从更远处看见你。先去病房找授权卡。', { tone: 'story', icon: '☣', duration: 6200 });
       }
     }, 850);
     updateTouchUI();
@@ -4860,6 +4923,7 @@
     ctx.restore();
 
     drawRain();
+    if (!isTitle) drawLanternDarkness(camX, camY, shx, shy, time);
     drawScreenEffects(time);
   }
 
@@ -5152,6 +5216,9 @@
           evacTime: state.evacTime,
           evacInside: state.evacInside,
           evacComplete: state.evacComplete,
+          lightRadius: state.lightRadius,
+          lightTarget: lanternTarget(),
+          lightPulse: state.lightPulse,
           player: { x: player.x, y: player.y, vx: player.vx, vy: player.vy, invuln: player.invuln },
           zombies: state.zombies.map(z => ({ id: z.id, x: z.x, y: z.y, state: z.state, awareness: z.awareness, dazed: z.dazed })),
           pickups: state.pickups.filter(p => !p.taken).map(p => ({ id: p.id, type: p.type, x: p.x, y: p.y })),

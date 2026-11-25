@@ -370,7 +370,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
 #hud{
   position:absolute;inset:0;
   transition:opacity .5s ease, visibility .5s ease;
-  z-index:10;
+  z-index:20;
 }
 #hud:before{
   content:"";position:absolute;left:0;right:0;top:0;height:180px;
@@ -450,6 +450,25 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
 .keycard-row.has-card{color:rgba(211,238,191,.7);}
 .keycard-row.has-card b{color:#b7e9ae;}
 .keycard-row.has-card .keycard-icon{border-color:rgba(188,236,165,.7);box-shadow:0 0 10px rgba(150,226,150,.18);}
+.lantern-row{
+  display:flex;align-items:center;gap:6px;
+  margin-top:7px;padding-top:7px;
+  border-top:1px solid rgba(221,214,184,.08);
+  font-size:8.5px;letter-spacing:.1em;
+  color:rgba(221,220,195,.42);
+}
+.lantern-row b{margin-left:auto;font-family:Georgia,serif;font-weight:400;letter-spacing:.02em;color:rgba(245,204,139,.82);}
+.lantern-row b em{font-style:normal;font-size:6.5px;font-family:var(--sans);letter-spacing:.04em;color:rgba(239,201,145,.38);margin-left:2px;}
+.lantern-glyph{
+  width:13px;height:13px;border:1px solid rgba(239,194,126,.5);
+  border-radius:50%;display:inline-block;position:relative;
+  box-shadow:0 0 9px rgba(239,181,96,.2);
+}
+.lantern-glyph:after{
+  content:"";position:absolute;inset:3px;border-radius:50%;
+  background:rgba(255,209,138,.72);
+  box-shadow:0 0 9px rgba(255,193,108,.5);
+}
 .danger-block{margin-top:10px;padding-top:9px;border-top:1px solid rgba(221,214,184,.08);transition:color .25s ease;}
 .danger-line{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.12em;color:rgba(220,219,194,.42);}
 .danger-line b{margin-left:auto;font-weight:400;color:rgba(224,220,193,.58);letter-spacing:.06em;}
@@ -655,7 +674,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
   mix-blend-mode:screen;
 }
 .pickup-fx.flash{animation:pickup-flash .45s ease;}
-.cinema-bars{position:absolute;left:0;right:0;top:0;bottom:0;z-index:14;pointer-events:none;}
+.cinema-bars{position:absolute;left:0;right:0;top:0;bottom:0;z-index:8;pointer-events:none;}
 .cinema-bars:before,.cinema-bars:after{
   content:"";position:absolute;left:0;right:0;height:0;background:#020608;
   transition:height .8s cubic-bezier(.2,.7,.2,1);
@@ -877,6 +896,8 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
 .touch-mode .gem{width:7px;height:7px;}
 .touch-mode .keycard-row{font-size:10px;margin-top:8px;padding-top:8px;}
 .touch-mode .keycard-icon{width:17px;height:12px;}
+.touch-mode .lantern-row{font-size:10px;margin-top:7px;padding-top:7px;}
+.touch-mode .lantern-glyph{width:16px;height:16px;}
 .touch-mode .danger-block{margin-top:9px;padding-top:8px;}
 .touch-mode .danger-line{font-size:10px;}
 .touch-mode .danger-bars{gap:5px;}
@@ -1022,6 +1043,11 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
               <span>撤离授权卡</span>
               <b id="keycardState">未取得</b>
             </div>
+            <div class="lantern-row">
+              <span class="lantern-glyph" aria-hidden="true"></span>
+              <span>提灯范围</span>
+              <b><span id="lanternRange">150</span><em>px</em></b>
+            </div>
             <div class="danger-block" id="dangerBlock">
               <div class="danger-line"><span class="eye-mark" aria-hidden="true"></span><span>感染者感知</span><b id="dangerWord">微弱</b></div>
               <div class="danger-bars" id="dangerBars" aria-hidden="true">
@@ -1121,7 +1147,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
               <article class="rule-card danger-rule">
                 <span class="rule-index">03 / 代价</span>
                 <h3>它们在追光</h3>
-                <p>携带的样本越亮，感染者的感知越远。<br />被抓住，会掉落 1 支样本。</p>
+                <p>每捡一支样本，提灯照得更远；<br />但感染者也会从更远处看见你。</p>
               </article>
             </div>
 
@@ -1189,7 +1215,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
                   <li><b>授权</b><span>金色卡片在病房病床旁；没有它，撤离控制台不会启动。</span></li>
                   <li><b>拾取</b><span>蓝色 +1，红色 +2；靠近自动拾取。</span></li>
                   <li><b>异变</b><span>3 支荧光共生提速，6 支解锁暴走。</span></li>
-                  <li><b>感知</b><span>样本越亮，感染者看得越远；围栏能挡住视线。</span></li>
+                  <li><b>灯域</b><span>每捡起样本，提灯范围扩大；样本越亮，感染者也会从更远处发现你。</span></li>
                   <li><b>失手</b><span>被感染者碰到会掉落 1 支样本，可以返回捡起。</span></li>
                 </ul>
               </div>
@@ -1550,6 +1576,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
     lightNow: $('lightNow'), lightPips: $('lightPips'),
     silverCount: $('silverCount'), goldCount: $('goldCount'),
     keycardRow: $('keycardRow'), keycardState: $('keycardState'),
+    lanternRange: $('lanternRange'),
     dangerBars: $('dangerBars'), dangerWord: $('dangerWord'), dangerBlock: $('dangerBlock'),
     objectiveText: $('objectiveText'), alertBanner: $('alertBanner'),
     evacHud: $('evacHud'), evacTimeLabel: $('evacTimeLabel'),
@@ -1590,6 +1617,8 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
     caught: 0,
     form: 0,
     keycard: false,
+    lightRadius: 150,
+    lightPulse: 0,
     evacActive: false,
     evacTime: EVAC_HOLD,
     evacInside: false,
@@ -3839,6 +3868,8 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
     state.caught = 0;
     state.form = 0;
     state.keycard = false;
+    state.lightRadius = 150;
+    state.lightPulse = 0;
     state.evacActive = false;
     state.evacTime = EVAC_HOLD;
     state.evacInside = false;
@@ -4088,6 +4119,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
       return;
     }
     haptic(p.type === 'red' ? 22 : 12);
+    state.lightPulse = 1;
     const old = state.samples;
     const oldForm = state.form;
     state.samples += p.value;
@@ -4434,7 +4466,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
       }
     }
 
-    const wantCard = state.samples >= GOAL && !state.keycard && !state.nearGate;
+    const wantCard = !state.keycard && !state.nearGate;
     const showWay = (ready || wantCard) && !state.nearGate && state.phase === 'playing';
     dom.wayfinder.classList.toggle('hidden', !showWay);
     if (showWay) {
@@ -4604,6 +4636,8 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
 
     state.elapsed += dt;
     state.form = formFor(state.samples);
+    state.lightRadius = damp(state.lightRadius, lanternTarget(), 5, dt);
+    state.lightPulse = Math.max(0, state.lightPulse - dt * 1.9);
     updatePlayer(dt);
     updateZombies(dt);
     updatePickups(dt);
@@ -4620,6 +4654,58 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
   function dangerLevel() {
     if (state.anyChase) return 5;
     return clamp(1 + Math.floor(Math.min(10, state.samples) / 1.8), 1, 5);
+  }
+
+  function lanternTarget() {
+    return 150 + Math.min(8, state.samples) * 15;
+  }
+
+  function drawLanternDarkness(camX, camY, shx, shy, time) {
+    const sx = player.x - camX + shx;
+    const sy = player.y - camY + shy - 14;
+    const r = state.lightRadius + state.lightPulse * 14;
+    const flicker = 1 + Math.sin(time * 7.1) * 0.012 + Math.sin(time * 2.3) * 0.008;
+
+    ctx.save();
+    const dark = ctx.createRadialGradient(sx, sy, r * 0.2, sx, sy, r * 1.0);
+    dark.addColorStop(0, 'rgba(0,2,2,0)');
+    dark.addColorStop(0.42, 'rgba(0,2,3,.03)');
+    dark.addColorStop(0.66, 'rgba(0,2,3,.26)');
+    dark.addColorStop(0.82, 'rgba(0,1,2,.68)');
+    dark.addColorStop(0.93, 'rgba(0,1,2,.92)');
+    dark.addColorStop(1, 'rgba(0,1,2,.965)');
+    ctx.fillStyle = dark;
+    ctx.fillRect(0, 0, W, H);
+
+    // Warm lantern falloff: the lit circle reads as one pool, not a flat hole.
+    ctx.globalCompositeOperation = 'screen';
+    const warm = ctx.createRadialGradient(sx, sy, 0, sx, sy, r * 0.86);
+    warm.addColorStop(0, `rgba(255,195,112,${0.13 * flicker})`);
+    warm.addColorStop(0.3, `rgba(247,168,86,${0.075 * flicker})`);
+    warm.addColorStop(0.66, 'rgba(209,118,53,.028)');
+    warm.addColorStop(1, 'rgba(209,118,53,0)');
+    ctx.fillStyle = warm;
+    ctx.fillRect(0, 0, W, H);
+
+    // A barely visible edge tells the player where the light ends.
+    const pulse = 0.5 + 0.5 * Math.sin(time * 2.4);
+    ctx.strokeStyle = `rgba(247,199,129,${0.055 + 0.025 * pulse + state.lightPulse * 0.12})`;
+    ctx.lineWidth = 1.1;
+    ctx.setLineDash([5, 12]);
+    ctx.beginPath();
+    ctx.arc(sx, sy, r * 0.93, 0, TAU);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // If the light expands, a brief amber ring travels outward.
+    if (state.lightPulse > 0.01) {
+      ctx.strokeStyle = `rgba(255,197,119,${state.lightPulse * 0.22})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(sx, sy, r * (1.05 + (1 - state.lightPulse) * 0.14), 0, TAU);
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 
   function updateHUD(force = false) {
@@ -4648,6 +4734,9 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
     if (changed('keycard', state.keycard)) {
       dom.keycardRow.classList.toggle('has-card', state.keycard);
       dom.keycardState.textContent = state.keycard ? '已取得' : '未取得';
+    }
+    if (changed('lantern', Math.round(lanternTarget()))) {
+      dom.lanternRange.textContent = String(Math.round(lanternTarget()));
     }
 
     const lvl = dangerLevel();
@@ -4743,7 +4832,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
     }, 560);
     setTimeout(() => {
       if (state.phase === 'playing') {
-        toast('隔离区第 47 天', '先去病房找撤离授权卡，再收集 8 支样本。样本越亮，感染者越远就能发现你。', { tone: 'story', icon: '☣', duration: 5600 });
+        toast('隔离区第 47 天', '提灯只照亮身边。每捡一支样本，灯域会扩大；但感染者也会从更远处看见你。先去病房找授权卡。', { tone: 'story', icon: '☣', duration: 6200 });
       }
     }, 850);
     updateTouchUI();
@@ -6110,6 +6199,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
     ctx.restore();
 
     drawRain();
+    if (!isTitle) drawLanternDarkness(camX, camY, shx, shy, time);
     drawScreenEffects(time);
   }
 
@@ -6402,6 +6492,9 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
           evacTime: state.evacTime,
           evacInside: state.evacInside,
           evacComplete: state.evacComplete,
+          lightRadius: state.lightRadius,
+          lightTarget: lanternTarget(),
+          lightPulse: state.lightPulse,
           player: { x: player.x, y: player.y, vx: player.vx, vy: player.vy, invuln: player.invuln },
           zombies: state.zombies.map(z => ({ id: z.id, x: z.x, y: z.y, state: z.state, awareness: z.awareness, dazed: z.dazed })),
           pickups: state.pickups.filter(p => !p.taken).map(p => ({ id: p.id, type: p.type, x: p.x, y: p.y })),

@@ -360,7 +360,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
 #hud{
   position:absolute;inset:0;
   transition:opacity .5s ease, visibility .5s ease;
-  z-index:10;
+  z-index:20;
 }
 #hud:before{
   content:"";position:absolute;left:0;right:0;top:0;height:180px;
@@ -440,6 +440,25 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
 .keycard-row.has-card{color:rgba(211,238,191,.7);}
 .keycard-row.has-card b{color:#b7e9ae;}
 .keycard-row.has-card .keycard-icon{border-color:rgba(188,236,165,.7);box-shadow:0 0 10px rgba(150,226,150,.18);}
+.lantern-row{
+  display:flex;align-items:center;gap:6px;
+  margin-top:7px;padding-top:7px;
+  border-top:1px solid rgba(221,214,184,.08);
+  font-size:8.5px;letter-spacing:.1em;
+  color:rgba(221,220,195,.42);
+}
+.lantern-row b{margin-left:auto;font-family:Georgia,serif;font-weight:400;letter-spacing:.02em;color:rgba(245,204,139,.82);}
+.lantern-row b em{font-style:normal;font-size:6.5px;font-family:var(--sans);letter-spacing:.04em;color:rgba(239,201,145,.38);margin-left:2px;}
+.lantern-glyph{
+  width:13px;height:13px;border:1px solid rgba(239,194,126,.5);
+  border-radius:50%;display:inline-block;position:relative;
+  box-shadow:0 0 9px rgba(239,181,96,.2);
+}
+.lantern-glyph:after{
+  content:"";position:absolute;inset:3px;border-radius:50%;
+  background:rgba(255,209,138,.72);
+  box-shadow:0 0 9px rgba(255,193,108,.5);
+}
 .danger-block{margin-top:10px;padding-top:9px;border-top:1px solid rgba(221,214,184,.08);transition:color .25s ease;}
 .danger-line{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.12em;color:rgba(220,219,194,.42);}
 .danger-line b{margin-left:auto;font-weight:400;color:rgba(224,220,193,.58);letter-spacing:.06em;}
@@ -645,7 +664,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
   mix-blend-mode:screen;
 }
 .pickup-fx.flash{animation:pickup-flash .45s ease;}
-.cinema-bars{position:absolute;left:0;right:0;top:0;bottom:0;z-index:14;pointer-events:none;}
+.cinema-bars{position:absolute;left:0;right:0;top:0;bottom:0;z-index:8;pointer-events:none;}
 .cinema-bars:before,.cinema-bars:after{
   content:"";position:absolute;left:0;right:0;height:0;background:#020608;
   transition:height .8s cubic-bezier(.2,.7,.2,1);
@@ -867,6 +886,8 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
 .touch-mode .gem{width:7px;height:7px;}
 .touch-mode .keycard-row{font-size:10px;margin-top:8px;padding-top:8px;}
 .touch-mode .keycard-icon{width:17px;height:12px;}
+.touch-mode .lantern-row{font-size:10px;margin-top:7px;padding-top:7px;}
+.touch-mode .lantern-glyph{width:16px;height:16px;}
 .touch-mode .danger-block{margin-top:9px;padding-top:8px;}
 .touch-mode .danger-line{font-size:10px;}
 .touch-mode .danger-bars{gap:5px;}
