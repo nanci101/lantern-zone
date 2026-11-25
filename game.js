@@ -318,8 +318,9 @@
     statCaught: $('statCaught'), statCollect: $('statCollect')
   };
 
-  const ctx = dom.canvas.getContext('2d');
+  const ctx = dom.canvas.getContext('2d', { alpha: false, desynchronized: true });
   let DPR = 1;
+  let LOW_POWER = false;
   let terrain = null;
   let grain = null;
 
@@ -632,6 +633,7 @@
   }
 
   function burst(x, y, color, count = 16, power = 130, size = 2.2, gravity = 40) {
+    if (LOW_POWER) count = Math.max(3, Math.round(count * 0.4));
     for (let i = 0; i < count; i++) {
       const a = Math.random() * TAU;
       const s = power * (0.3 + Math.random() * 0.7);
@@ -3629,7 +3631,9 @@
   const rain = [];
   const motes = [];
   function initWeather() {
-    for (let i = 0; i < 135; i++) {
+    const rainCount = LOW_POWER ? 46 : 135;
+    const moteCount = LOW_POWER ? 16 : 54;
+    for (let i = 0; i < rainCount; i++) {
       rain.push({
         x: Math.random() * W,
         y: Math.random() * H,
@@ -3640,7 +3644,7 @@
       });
     }
     const r = rng32(7319);
-    for (let i = 0; i < 54; i++) {
+    for (let i = 0; i < moteCount; i++) {
       motes.push({
         x: r() * WORLD.w,
         y: r() * WORLD.h,
@@ -3669,10 +3673,15 @@
     return x > state.camera.x - pad && x < state.camera.x + W + pad && y > state.camera.y - pad && y < state.camera.y + H + pad;
   }
 
+  function nearLantern(x, y, pad = 0) {
+    return dist(player.x, player.y, x, y) < state.lightRadius + pad;
+  }
+
   function drawPuddles(time) {
     for (let i = 0; i < PUDDLES.length; i++) {
       const [x, y, rx, ry] = PUDDLES[i];
       if (!worldVisible(x, y)) continue;
+      if (LOW_POWER && !nearLantern(x, y, 130)) continue;
       ctx.save();
       ctx.fillStyle = 'rgba(12,26,22,.56)';
       ctx.beginPath();
@@ -3702,6 +3711,7 @@
     ctx.globalCompositeOperation = 'lighter';
     for (const l of LAMPS) {
       if (!worldVisible(l.x, l.y, 130)) continue;
+      if (LOW_POWER && !nearLantern(l.x, l.y, 180)) continue;
       const flicker = 0.72 + 0.2 * Math.sin(time * 2.2 + l.seed) + 0.08 * Math.sin(time * 18 + l.seed * 3);
       const x = l.x;
       const y = l.y - l.h + 9;
@@ -3717,20 +3727,23 @@
       ctx.beginPath();
       ctx.arc(x, y, 3.2, 0, TAU);
       ctx.fill();
-      // 灯下的雨丝
-      ctx.strokeStyle = `rgba(255,221,156,${0.08 * flicker})`;
-      ctx.lineWidth = 0.7;
-      for (let i = 0; i < 4; i++) {
-        const a = time * 2 + i * 1.7;
-        ctx.beginPath();
-        ctx.moveTo(x, y + 4);
-        ctx.lineTo(x + Math.cos(a) * 2, y + 32 + (i * 9) % 24);
-        ctx.stroke();
+      // 灯下的雨丝（手机端省略，提灯黑场里几乎看不见）
+      if (!LOW_POWER) {
+        ctx.strokeStyle = `rgba(255,221,156,${0.08 * flicker})`;
+        ctx.lineWidth = 0.7;
+        for (let i = 0; i < 4; i++) {
+          const a = time * 2 + i * 1.7;
+          ctx.beginPath();
+          ctx.moveTo(x, y + 4);
+          ctx.lineTo(x + Math.cos(a) * 2, y + 32 + (i * 9) % 24);
+          ctx.stroke();
+        }
       }
     }
     // 室内与地标灯光
     for (const l of INTERIOR_LIGHTS) {
       if (!worldVisible(l.x, l.y, l.r + 50)) continue;
+      if (LOW_POWER && !nearLantern(l.x, l.y, 160)) continue;
       const flick = 0.55 + 0.25 * Math.sin(time * l.speed * 2 + l.x) + 0.08 * Math.sin(time * 13 + l.y);
       const gr = ctx.createRadialGradient(l.x, l.y, 0, l.x, l.y, l.r);
       gr.addColorStop(0, `rgba(${l.color},${0.13 * flick})`);
@@ -3779,6 +3792,7 @@
     for (let i = 0; i < FIRE_BARRELS.length; i++) {
       const [x, y] = FIRE_BARRELS[i];
       if (!worldVisible(x, y, 140)) continue;
+      if (LOW_POWER && !nearLantern(x, y, 160)) continue;
       const flick = 0.7 + 0.2 * Math.sin(time * 9 + i) + 0.1 * Math.sin(time * 23 + i * 2);
       const gr = ctx.createRadialGradient(x, y - 17, 0, x, y - 17, 120);
       gr.addColorStop(0, `rgba(247,170,87,${0.23 * flick})`);
@@ -3789,7 +3803,8 @@
       ctx.arc(x, y - 17, 120, 0, TAU);
       ctx.fill();
       // 火焰
-      for (let k = 0; k < 3; k++) {
+      const flames = LOW_POWER ? 2 : 3;
+      for (let k = 0; k < flames; k++) {
         const ox = Math.sin(time * 7 + k * 2.1 + i) * 3;
         const h = 10 + 8 * (0.5 + 0.5 * Math.sin(time * 10 + k + i));
         const flame = ctx.createLinearGradient(x, y - 20, x, y - 20 - h);
@@ -3808,6 +3823,7 @@
     for (let i = 0; i < SEARCHLIGHTS.length; i++) {
       const s = SEARCHLIGHTS[i];
       if (!worldVisible(s.x, s.y, s.len + 80)) continue;
+      if (LOW_POWER && !nearLantern(s.x, s.y, 260)) continue;
       const a = s.angle + Math.sin(time * 0.12 + s.seed) * 0.22;
       const ex = Math.cos(a) * s.len;
       const ey = Math.sin(a) * s.len;
@@ -3840,6 +3856,7 @@
       const x = m.x + Math.sin(time * m.speed + m.phase) * m.amp;
       const y = m.y + Math.cos(time * m.speed * 0.73 + m.phase) * m.amp * 0.5;
       if (!worldVisible(x, y, 20)) continue;
+      if (LOW_POWER && !nearLantern(x, y, 90)) continue;
       const tw = 0.25 + 0.75 * (0.5 + 0.5 * Math.sin(time * 1.5 + m.phase * 2));
       const col = m.warm ? '255,194,123' : '152,216,153';
       ctx.fillStyle = `rgba(${col},${0.12 * tw})`;
@@ -3858,9 +3875,10 @@
     if (z.dazed > 0) return;
     const ox = z.x, oy = z.y - 27;
     if (!worldVisible(ox, oy, 330)) return;
+    if (LOW_POWER && !nearLantern(ox, oy, 300)) return;
     const range = zombieRange(z);
     const fov = zombieFov(z);
-    const rays = 24;
+    const rays = LOW_POWER ? 8 : 24;
     const pts = [];
     for (let i = 0; i <= rays; i++) {
       const a = z.facing - fov / 2 + fov * i / rays;
@@ -3901,6 +3919,7 @@
 
   function drawSample(p, time) {
     if (!worldVisible(p.x, p.y, 120)) return;
+    if (LOW_POWER && !nearLantern(p.x, p.y, 100)) return;
     const red = p.type === 'red';
     const wisp = p.type === 'wisp';
     const keycard = p.type === 'keycard';
@@ -4035,6 +4054,7 @@
 
   function drawGate(time) {
     if (!worldVisible(GATE.x, GATE.y, 260)) return;
+    if (LOW_POWER && !nearLantern(GATE.x, GATE.y, 300)) return;
     const ready = state.samples >= GOAL && state.keycard;
     const pulse = 0.5 + 0.5 * Math.sin(time * 2.3);
     const x = GATE.x, y = GATE.y + 60;
@@ -4131,6 +4151,7 @@
 
   function drawZombie(z, time) {
     if (!worldVisible(z.x, z.y, 150)) return;
+    if (LOW_POWER && !nearLantern(z.x, z.y, 110)) return;
     const dazed = z.dazed > 0;
     const chase = z.state === 'chase';
     const dir = Math.cos(z.facing) < -0.12 ? -1 : 1;
@@ -4758,6 +4779,7 @@
   function drawParticles() {
     ctx.save();
     for (const p of state.particles) {
+      if (LOW_POWER && !nearLantern(p.x, p.y, 90)) continue;
       const a = clamp(p.life / p.maxLife, 0, 1);
       if (p.shape === 'smoke') {
         ctx.globalCompositeOperation = 'source-over';
@@ -4800,7 +4822,9 @@
   function drawRain() {
     ctx.save();
     ctx.strokeStyle = 'rgba(172,207,182,.14)';
-    for (const d of rain) {
+    for (let i = 0; i < rain.length; i++) {
+      if (LOW_POWER && i > 46) break;
+      const d = rain[i];
       ctx.globalAlpha = d.alpha;
       ctx.lineWidth = d.width;
       ctx.beginPath();
@@ -4812,6 +4836,21 @@
   }
 
   function drawScreenEffects(time) {
+    if (LOW_POWER) {
+      // On phones, the lantern mask already supplies the vignette. Keep only
+      // the chase warning and skip full-screen grain/fog gradients.
+      if (state.anyChase && state.phase === 'playing') {
+        ctx.save();
+        const pulse = 0.6 + 0.4 * Math.sin(time * 5);
+        const g = ctx.createRadialGradient(W * 0.5, H * 0.5, H * 0.28, W * 0.5, H * 0.5, H * 0.82);
+        g.addColorStop(0, 'rgba(0,0,0,0)');
+        g.addColorStop(1, `rgba(132,36,32,${0.16 * pulse})`);
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, W, H);
+        ctx.restore();
+      }
+      return;
+    }
     // 整体提亮，避免投影时看不清
     ctx.save();
     ctx.globalCompositeOperation = 'screen';
@@ -4935,7 +4974,7 @@
   let frameTime = 0;
 
   function loop(now) {
-    const dt = Math.min(0.05, (now - last) / 1000);
+    const dt = Math.min(LOW_POWER ? 0.1 : 0.05, (now - last) / 1000);
     last = now;
     frameTime = now / 1000;
     update(dt);
@@ -4946,8 +4985,9 @@
 
   function resize() {
     const coarse = isCoarse();
+    LOW_POWER = coarse && window.innerWidth < 1100;
     document.body.classList.toggle('touch-mode', coarse);
-    DPR = Math.min(coarse && window.innerWidth < 1100 ? 1 : 2, window.devicePixelRatio || 1);
+    DPR = LOW_POWER ? 0.62 : Math.min(2, window.devicePixelRatio || 1);
     dom.canvas.width = Math.floor(W * DPR);
     dom.canvas.height = Math.floor(H * DPR);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
