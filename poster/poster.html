@@ -66,7 +66,7 @@
     display:inline-flex;align-items:center;justify-content:center;color:var(--amber);font-size:14px;line-height:1;}
   .rule-line{width:54px;height:1px;background:linear-gradient(90deg,rgba(231,181,102,.55),transparent);}
   .topline .right{color:rgba(230,211,169,.28);}
-  .author-top{color:rgba(240,198,129,.68);letter-spacing:.14em;font-family:var(--sans);}
+  .author-top{color:rgba(240,198,129,.78);letter-spacing:.12em;font-family:var(--sans);font-size:12px;}
 
   .title-wrap{position:relative;z-index:8;flex:none;margin-top:22px;min-height:264px;}
   .eyebrow{display:flex;align-items:center;gap:14px;font-size:11px;letter-spacing:.22em;color:rgba(225,208,167,.52);}
@@ -86,6 +86,17 @@
     font-family:var(--serif);font-size:21px;letter-spacing:.12em;color:rgba(241,218,184,.8);
   }
   .tagline .dot{width:7px;height:7px;border-radius:50%;background:var(--rust);box-shadow:0 0 16px rgba(214,110,81,.55);}
+  .author-credit{
+    display:flex;align-items:baseline;gap:14px;
+    margin-top:12px;padding-top:10px;width:max-content;
+    border-top:1px solid rgba(231,181,102,.2);
+  }
+  .author-credit span{font-family:Georgia,serif;font-size:8.5px;letter-spacing:.24em;color:rgba(231,181,102,.58);}
+  .author-credit b{
+    font-family:var(--serif);font-weight:400;font-size:31px;line-height:1;letter-spacing:.1em;
+    color:#f8e8c9;text-shadow:0 0 26px rgba(239,185,105,.16);
+  }
+  .author-credit em{font-style:normal;font-family:Georgia,serif;font-size:8px;letter-spacing:.18em;color:rgba(220,207,178,.34);padding-left:12px;border-left:1px solid rgba(231,181,102,.18);}
   .poster-stamp{
     position:absolute;right:0;top:196px;z-index:8;padding:8px 14px 7px;
     border:2px solid rgba(214,110,81,.27);transform:rotate(-7deg);
@@ -94,7 +105,7 @@
   .poster-stamp small{display:block;margin-top:3px;font-family:var(--sans);font-size:6.5px;letter-spacing:.16em;color:rgba(219,126,99,.3);}
 
   .hero{
-    position:relative;z-index:3;height:870px;flex:none;margin-top:10px;
+    position:relative;z-index:3;height:820px;flex:none;margin-top:10px;
     border-top:1px solid var(--line);border-bottom:1px solid var(--line);
     background:
       radial-gradient(ellipse at 50% 48%, rgba(245,181,99,.2), rgba(50,37,21,.08) 28%, transparent 58%),
@@ -291,6 +302,11 @@
     <div class="eyebrow"><span class="line"></span><span>一个关于灯、收集与取舍的末日小作品</span></div>
     <h1><span class="cn">禁区提灯</span><span class="sub">感染区</span></h1>
     <div class="tagline"><span class="dot"></span>你点亮的每一束光，都会把尸群引来。</div>
+    <div class="author-credit">
+      <span>AUTHOR / 作者</span>
+      <b>阮佳乐</b>
+      <em>2026</em>
+    </div>
     <div class="poster-stamp">NO EVAC<small>THE LIGHT IS A CHOICE</small></div>
   </section>
 
@@ -476,7 +492,7 @@
         <b>扫码进入<br>感染区</b>
         <span>SCAN TO PLAY</span>
         <em>手机请横屏<br>触控 · 无需安装</em>
-        <small>作者 / AUTHOR<br><b>阮佳乐</b></small>
+        <small>作者 / AUTHOR<br><b style="font-family:var(--serif);font-size:18px;letter-spacing:.08em;">阮佳乐</b></small>
       </div>
     </div>
 
