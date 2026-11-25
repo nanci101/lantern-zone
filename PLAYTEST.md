@@ -95,21 +95,23 @@
 
 第一次手机测试时，画面能操作，但游戏时钟只有 **0.066 秒 / 真实 1 秒**；后续降低 DPR 后又收到真机“还是卡”的反馈。最终做了三轮优化：
 
-1. **降低渲染分辨率**：手机 Canvas 改为 **0.62 倍**（793 × 446 缓冲区），不再渲染 1280 × 720 / 1920 × 1080；
-2. **按灯域裁剪**：提灯外几乎全黑，因此手机端只绘制灯域附近的僵尸、样本、灯光、水洼、粒子和视锥；视野外对象不进入 Canvas；
-3. **减少合成与特效**：
-   - 雨 135 → 46 条，尘埃 54 → 16 个；
+1. **降低渲染分辨率**：手机 Canvas 改为 **0.55 倍**（704 × 396 缓冲区），不再渲染 1280 × 720 / 1920 × 1080；
+2. **锁定 30fps**：手机端渲染循环约每 33ms 才更新/绘制一次，避免 120Hz 屏幕把 Canvas 画 120 次/秒；
+3. **按灯域裁剪**：提灯外几乎全黑，因此手机端只绘制灯域附近的僵尸、样本、灯光、水洼、粒子和视锥；视野外对象不进入 Canvas；
+4. **减少合成与特效**：
+   - 雨 135 → 32 条，尘埃 54 → 12 个；
    - 视锥采样 24 → 8 条射线；
    - 粒子数量约降到 40%；
    - 手机端跳过整屏雾/噪点/暗角合成；
-   - Canvas 使用 `alpha:false`、`desynchronized`；
+   - Canvas 使用 `alpha:false`，去掉可能抖动的 `desynchronized`；
    - HUD 的 `backdrop-filter` 在手机端关闭；
-4. **低帧率不变成慢动作**：`dt` 上限从 0.05 放宽到 0.1。
+5. **低帧率不变成慢动作**：`dt` 上限从 0.05 放宽到 0.1。
 
 复测同一 844 × 390 视口：
 
-- Canvas 实际缓冲区：**793 × 446**；
-- CPU 降速 **4× / 6×** 下，1 秒真实时间 → 游戏时间 **1.018 秒**；
+- Canvas 实际缓冲区：**704 × 396**；
+- CPU 降速 **1× / 4× / 6×**：1 秒真实时间 → 游戏时间 **1.018 / 0.982 / 1.018 秒**；
+- 按住右方向 1 秒：x 增加约 **189px**；
 - 页面无 pageerror；
 - 画面仍保留提灯、灯光、角色、样本和守点 HUD，仅边缘略软。
 
@@ -120,7 +122,7 @@
 实际验证：
 
 - 本地响应：`HTTP 200`，`Content-type: application/xhtml+xml`；
-- CDN 响应：`HTTP 200`，`Content-type: application/xhtml+xml`，247,820 bytes（fastly.jsdelivr.net，`play-mobile.xhtml`，新文件名避免旧缓存）；
+- CDN 响应：`HTTP 200`，`Content-type: application/xhtml+xml`，247,820 bytes（fastly.jsdelivr.net，`play-smooth.xhtml`，新文件名避免旧缓存）；
 - 手机视口 844 × 390：手机开始页显示，点击“横屏开始”进入游戏；
 - 触控控件显示；在 CDN 版本上按右方向 800ms，玩家 x 从 260 → 406（+146px）；
 - 提灯 HUD 初始为 150px；
@@ -146,7 +148,7 @@
 ### 3.8 最终海报二维码 / 扫码验证
 
 - 海报版本：**以提灯为主体的插画版**，不再使用游戏界面截图；
-- 最终海报二维码内容：`https://fastly.jsdelivr.net/gh/nanci101/lantern-zone@main/play-mobile.xhtml`；
+- 最终海报二维码内容：`https://fastly.jsdelivr.net/gh/nanci101/lantern-zone@main/play-smooth.xhtml`；
 - 用 OpenCV 对最终 2480 × 3508 的 `poster.png` 做二维码解码（海报左侧 QR 区域），识别出上述直链；
 - 在手机视口打开该链接：`application/xhtml+xml`；
 - 页面标题为「禁区提灯 · 感染区」，显示手机开始页；点击“横屏开始”后触控控件显示，提灯范围显示 150px；
@@ -227,7 +229,7 @@
 - 课堂第一次试玩建议先拿蓝样本、再去病房拿授权卡，最后选两个红区。
 - `github.io` 在部分网络不可达，因此海报二维码直接指向 fastly.jsdelivr.net 的 XHTML 单文件镜像；GitHub Pages 仍保留作为仓库主页。
 - 公网短链（v.gd / da.gd）会插入安全提示页，不适合作为扫码后的直接游戏入口，因此最终海报改用直链。
-- `play-mobile.xhtml` 是手机优化版的独立文件名，避免 jsDelivr 对旧 `play.xhtml` / `play-light.xhtml` 的缓存；以后更新游戏时建议继续换新文件名。
+- `play-smooth.xhtml` 是手机流畅版的独立文件名，避免 jsDelivr 对旧 `play.xhtml` / `play-light.xhtml` / `play-mobile.xhtml` 的缓存；以后更新游戏时建议继续换新文件名。
 - 手机测试使用 Edge 移动设备仿真 + PointerEvent；真实手机（尤其 iOS Safari）的字体、全屏和振动反馈可能略有差异。
 - 黑场会显著改变首次游玩的可见性：课堂第一次试玩建议先沿公路找蓝色样本，再进病房拿授权卡，不要一开始就横穿全图。
 
