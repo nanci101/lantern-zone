@@ -4972,18 +4972,40 @@
 
   let last = performance.now();
   let frameTime = 0;
+  let frameBudget = 1000 / 60;
+  let perfAccum = 0;
+  let perfFrames = 0;
+  let mobileFpsMode = 60;
 
   function loop(now) {
     requestAnimationFrame(loop);
-    // Phones: cap at ~30fps. A 120Hz screen would otherwise render the
-    // full Canvas scene 120 times per second and make the device hot/stutter.
-    if (LOW_POWER && now - last < 1000 / 30 - 1) return;
+    // Phones: start at 60fps; if the actual update+render cost stays high,
+    // downgrade to a stable 30fps instead of forcing 60 all the time.
+    if (LOW_POWER && now - last < frameBudget - 1) return;
     const dt = Math.min(LOW_POWER ? 0.1 : 0.05, (now - last) / 1000);
     last = now;
     frameTime = now / 1000;
+    const t0 = performance.now();
     update(dt);
     updateRain(dt);
     render(frameTime);
+
+    if (LOW_POWER) {
+      perfAccum += performance.now() - t0;
+      perfFrames++;
+      if (perfFrames >= 36) {
+        const avg = perfAccum / perfFrames;
+        if (avg > 21 && mobileFpsMode !== 30) {
+          mobileFpsMode = 30;
+          frameBudget = 1000 / 30;
+        } else if (avg < 13 && mobileFpsMode !== 60) {
+          mobileFpsMode = 60;
+          frameBudget = 1000 / 60;
+        }
+        perfAccum = 0;
+        perfFrames = 0;
+      }
+    }
   }
 
   function resize() {
@@ -5262,6 +5284,7 @@
           lightRadius: state.lightRadius,
           lightTarget: lanternTarget(),
           lightPulse: state.lightPulse,
+          fpsMode: mobileFpsMode,
           player: { x: player.x, y: player.y, vx: player.vx, vy: player.vy, invuln: player.invuln },
           zombies: state.zombies.map(z => ({ id: z.id, x: z.x, y: z.y, state: z.state, awareness: z.awareness, dazed: z.dazed })),
           pickups: state.pickups.filter(p => !p.taken).map(p => ({ id: p.id, type: p.type, x: p.x, y: p.y })),
