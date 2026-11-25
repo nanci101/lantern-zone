@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#060f0d">
-  <meta name="description" content="《禁区提灯·感染区》—— 在封锁区收集荧光抗体样本，样本越亮能力越强，感染者也会从更远处发现你。带 8 支样本抵达撤离点。">
+  <meta name="description" content="《禁区提灯·感染区》—— 在封锁区找到撤离授权卡、收集 8 支荧光抗体样本，在停机坪坚持 25 秒等待救援。样本越亮能力越强，感染者也会从更远处发现你。">
   <title>禁区提灯 · 感染区</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23081210'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%23b9d69b' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='4' fill='%23f1c07d'/%3E%3Cpath d='M32 14v12M32 38v12M15 25l11 6M38 34l11 6M15 39l11-6M38 30l11-6' stroke='%23b9d69b' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
@@ -29,6 +29,11 @@
               <span class="mini-count silver-count"><i class="gem silver"></i>蓝 <b id="silverCount">0</b><em>/4</em></span>
               <span class="mini-count gold-count"><i class="gem gold"></i>红 <b id="goldCount">0</b><em>/3</em></span>
             </div>
+            <div class="keycard-row" id="keycardRow">
+              <span class="keycard-icon" aria-hidden="true"></span>
+              <span>撤离授权卡</span>
+              <b id="keycardState">未取得</b>
+            </div>
             <div class="danger-block" id="dangerBlock">
               <div class="danger-line"><span class="eye-mark" aria-hidden="true"></span><span>感染者感知</span><b id="dangerWord">微弱</b></div>
               <div class="danger-bars" id="dangerBars" aria-hidden="true">
@@ -42,7 +47,17 @@
             <strong id="objectiveText">带 8 支样本到撤离点</strong>
           </div>
 
+          <div id="evacHud" class="evac-hud hidden" aria-live="assertive">
+            <div class="evac-topline"><span>HELICOPTER INBOUND</span><b>救援降落</b></div>
+            <div class="evac-time"><b id="evacTimeLabel">00:25</b><em>s</em></div>
+            <div class="evac-track"><i id="evacProgress"></i></div>
+            <small id="evacHint">留在 H 停机坪，坚持到螺旋桨落地</small>
+          </div>
+
           <div class="top-actions">
+            <button id="fullscreenBtn" class="icon-btn fullscreen-btn" type="button" aria-label="进入全屏" title="全屏">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+            </button>
             <button id="soundBtn" class="icon-btn" type="button" aria-label="静音" title="声音（M）">
               <svg class="ico-sound" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>
             </button>
@@ -82,7 +97,7 @@
         <div id="cinemaBars" class="cinema-bars" aria-hidden="true"></div>
 
         <div id="touchControls" class="touch-controls" aria-hidden="true">
-          <div class="dpad">
+          <div id="dpad" class="dpad" aria-label="拖动方向键">
             <button class="dpad-btn up" type="button" data-move="up" aria-label="向上">▲</button>
             <button class="dpad-btn left" type="button" data-move="left" aria-label="向左">◀</button>
             <button class="dpad-btn down" type="button" data-move="down" aria-label="向下">▼</button>
@@ -107,8 +122,8 @@
             <div class="rules-grid">
               <article class="rule-card">
                 <span class="rule-index">01 / 撤离</span>
-                <h3>带回 8 支样本</h3>
-                <p>蓝色抗体 <b>+1</b>，红色活性样本 <b>+2</b>。<br>把样本带进地图东北角的撤离点。</p>
+                <h3>授权卡 + 8 支样本</h3>
+                <p>先在病房找到 <b>撤离授权卡</b>，再带 8 支样本到 H 停机坪。<br>在停机坪坚持 <b>25 秒</b>，等救援落地。</p>
               </article>
               <article class="rule-card">
                 <span class="rule-index">02 / 异变</span>
@@ -134,7 +149,25 @@
               </div>
             </div>
 
-            <p class="title-footnote"><span class="footnote-star">☣</span> 全场 4 蓝 + 3 红。想凑够 8 支，至少要闯进 2 个红色隔离区。<span class="footnote-dim">试玩约 4 分钟 · 键盘 / 触屏</span></p>
+            <p class="title-footnote"><span class="footnote-star">☣</span> 全场 4 蓝 + 3 红。想凑够 8 支，至少要闯进 2 个红色隔离区；拿到授权卡后还要守住停机坪。<span class="footnote-dim">试玩约 5 分钟 · 键盘 / 触屏</span></p>
+          </div>
+
+          <div class="mobile-start" id="mobileStart">
+            <div class="mobile-kicker"><span></span>QUARANTINE / DAY 47</div>
+            <h2>禁区提灯</h2>
+            <p class="mobile-tagline">你点亮的每一束光，都会把尸群引来。</p>
+            <div class="mobile-steps">
+              <div><b>01</b><span>病房拿<br>授权卡</span></div>
+              <div><b>02</b><span>带 8 支<br>样本撤离</span></div>
+              <div><b>03</b><span>停机坪<br>守 25 秒</span></div>
+            </div>
+            <button id="mobileStartBtn" class="primary-btn mobile-start-btn" type="button">
+              <span class="btn-glow"></span>
+              <span class="btn-label">横屏开始</span>
+              <span class="btn-arrow">→</span>
+            </button>
+            <p class="mobile-controls">左侧方向键移动 · 右侧「暴走」/「检查控制台」</p>
+            <p class="mobile-note">建议横屏游玩；进入游戏后点右上角 ⛶ 可全屏。iPhone 请手动旋转屏幕。</p>
           </div>
 
           <div class="title-right" aria-hidden="true">
@@ -164,7 +197,8 @@
               <div>
                 <h3>生存规则</h3>
                 <ul class="rule-list">
-                  <li><b>撤离</b><span>带 8 支样本抵达撤离点，按 E 呼叫救援。</span></li>
+                  <li><b>撤离</b><span>先在病房取得授权卡，带 8 支样本到 H 停机坪，在停机坪坚持 25 秒等救援。</span></li>
+                  <li><b>授权</b><span>金色卡片在病房病床旁；没有它，撤离控制台不会启动。</span></li>
                   <li><b>拾取</b><span>蓝色 +1，红色 +2；靠近自动拾取。</span></li>
                   <li><b>异变</b><span>3 支荧光共生提速，6 支解锁暴走。</span></li>
                   <li><b>感知</b><span>样本越亮，感染者看得越远；围栏能挡住视线。</span></li>
@@ -173,14 +207,21 @@
               </div>
               <div>
                 <h3>操作</h3>
-                <div class="key-list">
+                <div class="key-list desktop-help">
                   <div><span class="keycap">WASD</span><span class="keycap">方向键</span><em>移动</em></div>
                   <div><span class="keycap">Shift</span><em>暴走冲刺（6 支样本解锁）</em></div>
-                  <div><span class="keycap">E</span><em>进入撤离点</em></div>
+                  <div><span class="keycap">E</span><em>检查控制台 / 呼叫救援</em></div>
                   <div><span class="keycap">M</span><em>静音 / 恢复声音</em></div>
                   <div><span class="keycap">Esc</span><em>暂停 / 继续</em></div>
                 </div>
-                <div class="pause-tip">提示：先拿蓝，还是先闯红区？带着越多样本，感染者的视野越远。</div>
+                <div class="key-list touch-help">
+                  <div><span class="keycap">左侧</span><em>在圆盘上拖动，控制移动方向</em></div>
+                  <div><span class="keycap">暴走</span><em>右下按钮，6 支样本后解锁</em></div>
+                  <div><span class="keycap">控制台</span><em>靠近 H 停机坪后点击</em></div>
+                  <div><span class="keycap">⛶</span><em>右上角进入全屏</em></div>
+                  <div><span class="keycap">❚❚</span><em>右上角暂停</em></div>
+                </div>
+                <div class="pause-tip">提示：先拿授权卡再凑样本，或边收集边闯红区。守点时倒计时只在停机坪圈内推进。</div>
               </div>
             </div>
             <button id="resumeBtn2" class="primary-btn small-btn" type="button">继续行动 <span>→</span></button>
@@ -190,9 +231,9 @@
         <section id="winScreen" class="screen win-screen hidden">
           <div class="win-glow"></div>
           <div class="win-content">
-            <span class="modal-kicker">EVAC SIGNAL RECEIVED</span>
-            <h2>信号，亮了。</h2>
-            <p class="win-line">你带回了 <b id="winLight">8</b> 支荧光抗体。<br>救援队的螺旋桨声正在靠近。</p>
+            <span class="modal-kicker">HELICOPTER LANDED / EVAC COMPLETE</span>
+            <h2>救援落地。</h2>
+            <p class="win-line">你带回了 <b id="winLight">8</b> 支荧光抗体，<br>也守住了最后 25 秒。</p>
             <div class="win-stats">
               <div><span>撤离用时</span><b id="statTime">0:00</b></div>
               <div><span>被感染者抓住</span><b id="statCaught">0</b></div>

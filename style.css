@@ -418,6 +418,28 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
 .gem{width:6px;height:6px;display:inline-block;transform:rotate(45deg);border-radius:1px;}
 .gem.silver{background:#a8e9b7;box-shadow:0 0 8px rgba(144,226,164,.45);}
 .gem.gold{background:#e97c60;box-shadow:0 0 8px rgba(233,124,96,.55);}
+.keycard-row{
+  display:flex;align-items:center;gap:6px;
+  margin-top:7px;padding-top:7px;
+  border-top:1px solid rgba(221,214,184,.08);
+  font-size:8.5px;letter-spacing:.1em;
+  color:rgba(221,220,195,.42);
+  transition:color .3s ease;
+}
+.keycard-row b{margin-left:auto;font-weight:400;letter-spacing:.06em;color:rgba(229,153,125,.8);}
+.keycard-icon{
+  width:14px;height:10px;display:inline-block;
+  border:1px solid rgba(236,190,141,.55);border-radius:2px;
+  position:relative;transform:rotate(-8deg);
+  background:linear-gradient(135deg,rgba(246,209,158,.22),rgba(246,209,158,.03));
+}
+.keycard-icon:after{
+  content:"";position:absolute;left:2px;top:2px;width:4px;height:3px;
+  border-radius:50%;background:rgba(249,220,168,.6);
+}
+.keycard-row.has-card{color:rgba(211,238,191,.7);}
+.keycard-row.has-card b{color:#b7e9ae;}
+.keycard-row.has-card .keycard-icon{border-color:rgba(188,236,165,.7);box-shadow:0 0 10px rgba(150,226,150,.18);}
 .danger-block{margin-top:10px;padding-top:9px;border-top:1px solid rgba(221,214,184,.08);transition:color .25s ease;}
 .danger-line{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.12em;color:rgba(220,219,194,.42);}
 .danger-line b{margin-left:auto;font-weight:400;color:rgba(224,220,193,.58);letter-spacing:.06em;}
@@ -447,6 +469,28 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
 .objective-kicker{display:block;font-size:6.8px;letter-spacing:.32em;color:rgba(231,202,143,.55);margin-bottom:2px;}
 .objective-pill strong{font-size:11px;font-weight:400;letter-spacing:.1em;color:rgba(244,235,213,.78);white-space:nowrap;}
 .objective-pill strong em{font-style:normal;color:var(--gold);}
+.evac-hud{
+  position:absolute;left:50%;top:118px;transform:translateX(-50%);
+  width:280px;padding:10px 18px 11px;
+  z-index:16;text-align:center;
+  border:1px solid rgba(239,170,115,.42);
+  border-radius:10px;
+  background:linear-gradient(160deg,rgba(46,24,16,.9),rgba(8,19,18,.82));
+  box-shadow:0 18px 50px rgba(0,0,0,.35),0 0 30px rgba(232,133,85,.1);
+  backdrop-filter:blur(11px);-webkit-backdrop-filter:blur(11px);
+  transition:opacity .3s ease,visibility .3s ease,border-color .3s ease;
+}
+.evac-hud.urgent{border-color:rgba(252,132,96,.7);box-shadow:0 18px 50px rgba(0,0,0,.35),0 0 34px rgba(235,104,77,.2);}
+.evac-hud.is-paused{border-color:rgba(239,203,139,.32);}
+.evac-topline{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:6.4px;letter-spacing:.2em;color:rgba(227,182,139,.48);}
+.evac-topline b{font-weight:400;font-family:var(--serif);font-size:10px;letter-spacing:.14em;color:#f0c28e;}
+.evac-time{display:flex;align-items:baseline;justify-content:center;gap:5px;margin:2px 0 4px;}
+.evac-time b{font-family:Georgia,var(--serif);font-size:32px;font-weight:400;line-height:1;color:#ffe0b0;letter-spacing:.02em;text-shadow:0 0 22px rgba(247,171,110,.28);}
+.evac-time em{font-style:normal;font-family:Georgia,serif;font-size:11px;color:rgba(246,199,151,.5);}
+.evac-track{height:3px;border-radius:3px;background:rgba(237,197,148,.1);overflow:hidden;margin:0 2px 7px;}
+.evac-track i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#edd39a,#d97d55);border-radius:3px;transition:width .2s linear;}
+.evac-hud small{display:block;font-size:7.4px;line-height:1.5;letter-spacing:.08em;color:rgba(237,213,178,.46);}
+.evac-hud.urgent .evac-time b{animation:evac-blink 1s steps(2,end) infinite;}
 .top-actions{position:absolute;right:24px;top:24px;display:flex;gap:8px;}
 .icon-btn{
   width:36px;height:36px;border-radius:50%;
@@ -655,6 +699,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
 .rule-list span{color:rgba(221,219,195,.56);}
 .key-list{display:flex;flex-direction:column;gap:10px;}
 .key-list>div{display:flex;align-items:center;gap:6px;}
+.touch-help{display:none;}
 .key-list em{font-style:normal;font-size:9px;color:rgba(221,218,193,.5);margin-left:4px;}
 .pause-tip{
   margin-top:21px;padding:10px 12px;
@@ -739,7 +784,8 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
 .dpad-btn.left{left:4px;top:52px;}
 .dpad-btn.down{left:52px;bottom:4px;}
 .dpad-btn.right{right:4px;top:52px;}
-.dpad-core{position:absolute;left:63px;top:63px;width:28px;height:28px;border-radius:50%;border:1px solid rgba(236,219,183,.13);}
+.dpad-core{position:absolute;left:63px;top:63px;width:28px;height:28px;border-radius:50%;border:1px solid rgba(236,219,183,.13);transition:transform .08s linear, background .12s ease, border-color .12s ease;}
+.dpad.is-dragging .dpad-core{border-color:rgba(245,208,148,.48);background:rgba(239,205,146,.1);box-shadow:0 0 18px rgba(235,190,117,.16);}
 .touch-actions{position:absolute;right:24px;bottom:26px;display:flex;align-items:flex-end;gap:10px;}
 .touch-dash{
   width:82px;height:82px;border-radius:50%;
@@ -770,6 +816,137 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
 .rotate-hint strong{font-family:var(--serif);font-size:22px;font-weight:400;letter-spacing:.14em;color:#f1e4c8;}
 .rotate-hint span{font-size:11px;letter-spacing:.05em;color:rgba(224,218,192,.46);}
 
+/* ============ mobile / touch mode ============ */
+.fullscreen-btn{display:none;}
+.mobile-start{display:none;}
+
+.touch-mode .title-left,
+.touch-mode .title-right{display:none;}
+.touch-mode .mobile-start{
+  display:flex;
+  position:absolute;left:50%;top:50%;z-index:4;
+  width:680px;
+  transform:translate(-50%,-52%);
+  flex-direction:column;align-items:flex-start;
+  padding:28px 36px 26px;
+  border:1px solid rgba(234,218,179,.18);
+  border-radius:12px;
+  background:linear-gradient(155deg,rgba(8,25,23,.9),rgba(4,13,14,.86));
+  box-shadow:0 30px 90px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,245,214,.06);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.mobile-kicker{display:flex;align-items:center;gap:8px;font-size:7px;letter-spacing:.28em;color:rgba(230,196,142,.55);}
+.mobile-kicker span{width:22px;height:1px;background:rgba(235,194,137,.45);}
+.mobile-start h2{
+  margin:12px 0 0;
+  font-family:var(--serif);font-weight:400;font-size:64px;line-height:1;
+  letter-spacing:.08em;color:#f7ecd4;
+  text-shadow:0 4px 30px rgba(222,157,103,.16);
+}
+.mobile-tagline{margin:9px 0 0;font-family:var(--serif);font-size:16px;letter-spacing:.1em;color:rgba(236,211,184,.74);}
+.mobile-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;width:100%;margin:22px 0 20px;border-top:1px solid rgba(234,214,176,.14);border-bottom:1px solid rgba(234,214,176,.1);}
+.mobile-steps div{display:flex;align-items:center;gap:9px;padding:12px 12px 12px 0;border-right:1px solid rgba(234,214,176,.09);}
+.mobile-steps div + div{padding-left:14px;}
+.mobile-steps div:last-child{border-right:0;}
+.mobile-steps b{font-family:Georgia,serif;font-size:20px;font-weight:400;color:rgba(232,186,126,.62);}
+.mobile-steps span{font-size:12px;line-height:1.55;letter-spacing:.04em;color:rgba(230,222,198,.64);}
+.mobile-start-btn{height:78px;min-width:290px;font-size:19px;}
+.mobile-controls{margin:14px 0 0;font-size:10px;letter-spacing:.06em;color:rgba(226,220,196,.52);}
+.mobile-note{margin:5px 0 0;font-size:9px;line-height:1.5;letter-spacing:.03em;color:rgba(226,220,196,.29);}
+.touch-mode .fullscreen-btn{display:flex;}
+.touch-mode .brand-en{display:none;}
+.touch-mode .status-card{left:18px;top:16px;width:310px;padding:17px 19px 15px;}
+.touch-mode .brand-cn{font-size:17px;}
+.touch-mode .light-label{font-size:10px;}
+.touch-mode .light-value b{font-size:33px;}
+.touch-mode .light-value i{font-size:10px;}
+.touch-mode .light-pips{gap:7px;height:17px;}
+.touch-mode .pip{width:12px;height:12px;}
+.touch-mode .mini-counts{gap:18px;margin-top:10px;padding-top:9px;}
+.touch-mode .mini-count{font-size:10px;}
+.touch-mode .gem{width:7px;height:7px;}
+.touch-mode .keycard-row{font-size:10px;margin-top:8px;padding-top:8px;}
+.touch-mode .keycard-icon{width:17px;height:12px;}
+.touch-mode .danger-block{margin-top:9px;padding-top:8px;}
+.touch-mode .danger-line{font-size:10px;}
+.touch-mode .danger-bars{gap:5px;}
+.touch-mode .danger-bars i{height:4px;}
+.touch-mode .objective-pill{top:16px;min-width:390px;max-width:500px;padding:11px 24px 9px;}
+.touch-mode .objective-kicker{font-size:8px;}
+.touch-mode .objective-pill strong{font-size:13px;line-height:1.35;white-space:normal;}
+.touch-mode .top-actions{right:18px;top:16px;gap:9px;}
+.touch-mode .icon-btn{width:64px;height:64px;}
+.touch-mode .icon-btn svg{width:26px;height:26px;}
+.touch-mode .alert-banner{top:100px;padding:10px 20px 10px 14px;font-size:11px;gap:10px;}
+.touch-mode .toasts{min-width:0;}
+.touch-mode .toast{min-width:360px;padding:12px 20px;gap:12px;}
+.touch-mode .toast-copy b{font-size:13px;}
+.touch-mode .toast-copy span{font-size:10px;line-height:1.6;}
+.touch-mode .toast.ability{min-width:410px;padding:14px 22px;}
+.touch-mode .toast.ability .toast-copy b{font-size:17px;}
+.touch-mode .toast.ability .toast-copy span{font-size:11px;}
+.touch-mode .toast.story{max-width:520px;}
+.touch-mode .toast.story .toast-copy b{font-size:16px;}
+.touch-mode .toast.story .toast-copy span{font-size:10.5px;}
+.touch-mode .interact-prompt{bottom:132px;min-width:270px;padding:12px 18px 12px 13px;gap:12px;}
+.touch-mode .prompt-key{width:37px;height:37px;font-size:13px;}
+.touch-mode .prompt-copy b{font-size:16px;}
+.touch-mode .prompt-copy small{font-size:10px;}
+.touch-mode .prompt-arrow{font-size:19px;}
+.touch-mode .evac-hud{top:148px;width:340px;padding:12px 22px 14px;}
+.touch-mode .evac-topline{font-size:7.5px;}
+.touch-mode .evac-topline b{font-size:12px;}
+.touch-mode .evac-time b{font-size:40px;}
+.touch-mode .evac-time em{font-size:13px;}
+.touch-mode .evac-track{height:4px;}
+.touch-mode .evac-hud small{font-size:9px;}
+.touch-mode .dpad{left:18px;bottom:18px;width:224px;height:224px;}
+.touch-mode .dpad-btn{width:76px;height:76px;font-size:22px;border-radius:18px;}
+.touch-mode .dpad-btn.up{left:74px;top:4px;}
+.touch-mode .dpad-btn.left{left:4px;top:74px;}
+.touch-mode .dpad-btn.down{left:74px;bottom:4px;}
+.touch-mode .dpad-btn.right{right:4px;top:74px;}
+.touch-mode .dpad-core{left:93px;top:93px;width:38px;height:38px;}
+.touch-mode .touch-actions{right:18px;bottom:20px;gap:13px;}
+.touch-mode .touch-dash{width:96px;height:96px;font-size:16px;}
+.touch-mode .touch-dash small{font-size:8px;}
+.touch-mode .touch-interact{right:112px;bottom:124px;height:58px;min-width:132px;font-size:13px;}
+.touch-mode .hint-strip{display:none;}
+.touch-mode .status-card,
+.touch-mode .objective-pill,
+.touch-mode .interact-prompt,
+.touch-mode .toast,
+.touch-mode .evac-hud,
+.touch-mode .modal,
+.touch-mode .top-actions .icon-btn,
+.touch-mode .dpad-btn,
+.touch-mode .touch-dash,
+.touch-mode .mobile-start{
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
+.touch-mode .modal{width:1010px;padding:36px 42px 32px;}
+.touch-mode .desktop-help{display:none;}
+.touch-mode .touch-help{display:flex;}
+.touch-mode .win-footnote{display:none;}
+.touch-mode .pause-modal h2{font-size:42px;}
+.touch-mode .pause-columns{gap:38px;margin-top:22px;padding-top:20px;}
+.touch-mode .pause-columns h3{font-size:11px;margin-bottom:12px;}
+.touch-mode .rule-list{gap:8px;}
+.touch-mode .rule-list li{grid-template-columns:54px 1fr;gap:10px;font-size:13px;line-height:1.55;}
+.touch-mode .key-list{gap:8px;}
+.touch-mode .key-list em{font-size:12px;}
+.touch-mode .pause-tip{font-size:12px;margin-top:14px;padding:8px 12px;line-height:1.6;}
+.touch-mode .pause-modal .small-btn{height:52px;min-width:190px;font-size:14px;margin-top:18px;}
+.touch-mode .win-content{width:760px;padding:14px;}
+.touch-mode .win-content h2{font-size:70px;}
+.touch-mode .win-line{font-size:18px;margin:15px 0 22px;line-height:1.8;}
+.touch-mode .win-stats{width:560px;}
+.touch-mode .win-stats span{font-size:10px;}
+.touch-mode .win-stats b{font-size:24px;}
+.touch-mode .win-content blockquote{font-size:15px;margin:18px 0 18px;}
+.touch-mode .win-content .primary-btn{height:58px;min-width:210px;font-size:15px;}
+
 /* ============ boot ============ */
 .boot-veil{
   position:absolute;inset:0;z-index:100;
@@ -798,6 +975,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;}
 @keyframes win-breathe{0%,100%{transform:translate(-50%,-50%) scale(.97);opacity:.7;}50%{transform:translate(-50%,-50%) scale(1.04);opacity:1;}}
 @keyframes boot-load{0%{transform:translateX(-45px);}100%{transform:translateX(90px);}}
 @keyframes rotate-hint{0%,100%{transform:rotate(90deg) translateY(0);}50%{transform:rotate(90deg) translateY(-7px);}}
+@keyframes evac-blink{0%,49%{opacity:1;}50%,100%{opacity:.38;}}
 
 @media (orientation: portrait) and (max-width:900px){
   .rotate-hint{display:flex;}

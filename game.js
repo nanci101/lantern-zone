@@ -205,6 +205,10 @@
     { id: 'red-3', type: 'red', value: 2, x: 560, y: 428, seed: 7 }
   ];
 
+  // 撤离授权卡放在病房内，玩家必须先进入红区拿到它。
+  const KEYCARD_DEF = { id: 'keycard', type: 'keycard', value: 0, x: 2180, y: 1310, seed: 8 };
+  const EVAC_HOLD = 25;
+
   const ZOMBIE_DEFS = [
     {
       id: 'plaza', name: '水池感染者',
@@ -290,18 +294,25 @@
   const $ = id => document.getElementById(id);
   const dom = {
     stage: $('stage'), uiLayer: $('uiLayer'), canvas: $('game'), hud: $('hud'),
-    title: $('titleScreen'), startBtn: $('startBtn'), pause: $('pauseScreen'),
-    pauseBtn: $('pauseBtn'), resumeBtn: $('resumeBtn'), resumeBtn2: $('resumeBtn2'),
-    win: $('winScreen'), replayBtn: $('replayBtn'), soundBtn: $('soundBtn'),
+    title: $('titleScreen'), startBtn: $('startBtn'), mobileStartBtn: $('mobileStartBtn'),
+    pause: $('pauseScreen'), pauseBtn: $('pauseBtn'), resumeBtn: $('resumeBtn'), resumeBtn2: $('resumeBtn2'),
+    win: $('winScreen'), replayBtn: $('replayBtn'), soundBtn: $('soundBtn'), fullscreenBtn: $('fullscreenBtn'),
     lightNow: $('lightNow'), lightPips: $('lightPips'),
     silverCount: $('silverCount'), goldCount: $('goldCount'),
+    keycardRow: $('keycardRow'), keycardState: $('keycardState'),
     dangerBars: $('dangerBars'), dangerWord: $('dangerWord'), dangerBlock: $('dangerBlock'),
     objectiveText: $('objectiveText'), alertBanner: $('alertBanner'),
+    evacHud: $('evacHud'), evacTimeLabel: $('evacTimeLabel'),
+    evacProgress: $('evacProgress'), evacHint: $('evacHint'),
     hintStrip: $('hintStrip'), interactPrompt: $('interactPrompt'),
+    promptTitle: document.querySelector('#interactPrompt .prompt-copy b'),
+    promptSmall: document.querySelector('#interactPrompt .prompt-copy small'),
     wayfinder: $('wayfinder'), wayfinderArrow: document.querySelector('.wayfinder-arrow'),
+    wayfinderLabel: document.querySelector('.wayfinder-label'),
     toasts: $('toasts'), damageFx: $('damageFx'), pickupFx: $('pickupFx'),
     cinemaBars: $('cinemaBars'), bootVeil: $('bootVeil'),
     touchControls: $('touchControls'), touchDash: $('touchDash'), touchInteract: $('touchInteract'),
+    dpad: $('dpad'), dpadCore: document.querySelector('#dpad .dpad-core'),
     rotateHint: $('rotateHint'), winLight: $('winLight'), statTime: $('statTime'),
     statCaught: $('statCaught'), statCollect: $('statCollect')
   };
@@ -328,6 +339,12 @@
     red: 0,
     caught: 0,
     form: 0,
+    keycard: false,
+    evacActive: false,
+    evacTime: EVAC_HOLD,
+    evacInside: false,
+    evacSpawned: false,
+    evacComplete: false,
     camera: { x: 460, y: 360 },
     shake: 0,
     titleTime: 0,
@@ -373,6 +390,7 @@
     dashRequested: false,
     interactRequested: false
   };
+  let resetTouchStick = () => {};
 
   const GATE = {
     x: 2320,
@@ -634,6 +652,12 @@
     if (toastQueue.length > 2) toastQueue.shift();
     toastQueue.push({ title, sub, options });
     if (!toastBusy) nextToast();
+  }
+
+  function clearToasts() {
+    toastQueue.length = 0;
+    toastBusy = false;
+    dom.toasts.innerHTML = '';
   }
 
   function nextToast() {
@@ -2474,42 +2498,86 @@
      ============================================================ */
 
   function makePickups() {
-    return SAMPLE_DEFS.map(p => Object.assign({}, p, {
+    const samples = SAMPLE_DEFS.map(p => Object.assign({}, p, {
       taken: false,
       bob: Math.random() * TAU,
       notBefore: 0,
       wisp: false
     }));
+    samples.push(Object.assign({}, KEYCARD_DEF, {
+      taken: false,
+      bob: Math.random() * TAU,
+      notBefore: 0,
+      wisp: false
+    }));
+    return samples;
+  }
+
+  function makeZombie(def, i) {
+    const start = def.waypoints[0];
+    return {
+      id: def.id,
+      name: def.name,
+      x: start[0],
+      y: start[1],
+      waypoints: def.waypoints.map(p => ({ x: p[0], y: p[1] })),
+      wp: 1,
+      state: 'patrol',
+      facing: 0,
+      awareness: 0,
+      dazed: 0,
+      lostTimer: 0,
+      chaseTimer: 0,
+      lastKnown: { x: start[0], y: start[1] },
+      path: null,
+      pathTimer: 0,
+      repath: 0,
+      speedMul: def.speed,
+      rangeBias: def.range,
+      accent: def.accent,
+      eye: def.eye,
+      phase: i * 1.7 + 0.6,
+      scale: 0.96 + (i % 2) * 0.08,
+      temporary: !!def.temporary
+    };
   }
 
   function makeZombies() {
-    return ZOMBIE_DEFS.map((def, i) => {
-      const start = def.waypoints[0];
-      return {
-        id: def.id,
-        name: def.name,
-        x: start[0],
-        y: start[1],
-        waypoints: def.waypoints.map(p => ({ x: p[0], y: p[1] })),
-        wp: 1,
-        state: 'patrol',
-        facing: 0,
-        awareness: 0,
-        dazed: 0,
-        lostTimer: 0,
-        chaseTimer: 0,
-        lastKnown: { x: start[0], y: start[1] },
-        path: null,
-        pathTimer: 0,
-        repath: 0,
-        speedMul: def.speed,
-        rangeBias: def.range,
-        accent: def.accent,
-        eye: def.eye,
-        phase: i * 1.7 + 0.6,
-        scale: 0.96 + (i % 2) * 0.08
-      };
-    });
+    return ZOMBIE_DEFS.map((def, i) => makeZombie(def, i));
+  }
+
+  function spawnSurgeZombie(id, x, y, index) {
+    const z = makeZombie({
+      id,
+      name: '循声而来的感染者',
+      waypoints: [[x, y]],
+      speed: 0.86,
+      range: 30,
+      accent: '#564a3c',
+      eye: '#ffb98f',
+      temporary: true
+    }, 5 + index);
+    z.x = x;
+    z.y = y;
+    z.waypoints = [{ x, y }, { x, y }];
+    z.wp = 1;
+    z.state = 'chase';
+    z.awareness = 1;
+    z.chaseTimer = 0;
+    z.lastKnown = { x: player.x, y: player.y };
+    z.scale = 1.04;
+    state.zombies.push(z);
+    return z;
+  }
+
+  function spawnEvacSurge() {
+    if (state.evacSpawned) return;
+    state.evacSpawned = true;
+    spawnSurgeZombie('surge-1', 2110, 610, 1);
+    spawnSurgeZombie('surge-2', 2490, 600, 2);
+    Sound.ability(2);
+    state.shake = Math.max(state.shake, 6);
+    toast('它们听见螺旋桨了', '守住停机坪。被扑中会掉样本，别把它们丢在圈外。', { tone: 'warn', icon: '!', duration: 4400 });
   }
 
   function resetGame() {
@@ -2520,6 +2588,12 @@
     state.red = 0;
     state.caught = 0;
     state.form = 0;
+    state.keycard = false;
+    state.evacActive = false;
+    state.evacTime = EVAC_HOLD;
+    state.evacInside = false;
+    state.evacSpawned = false;
+    state.evacComplete = false;
     state.shake = 0;
     state.winTime = 0;
     state.anyChase = false;
@@ -2556,7 +2630,11 @@
     dom.cinemaBars.classList.remove('active');
     dom.interactPrompt.classList.remove('show');
     dom.touchInteract.classList.add('hidden');
+    dom.touchControls.classList.remove('show');
     dom.wayfinder.classList.add('hidden');
+    dom.evacHud.classList.add('hidden');
+    dom.evacHud.classList.remove('urgent', 'is-paused');
+    dom.keycardRow.classList.remove('has-card');
     updateHUD(true);
     updateHints();
     updateTouchUI();
@@ -2742,6 +2820,24 @@
 
   function collect(p) {
     p.taken = true;
+    if (p.type === 'keycard') {
+      state.keycard = true;
+      haptic(18);
+      Sound.ability(1);
+      burst(p.x, p.y - 16, 'rgba(246,209,148,.95)', 34, 190, 2.8, 16);
+      burst(p.x, p.y - 16, 'rgba(164,232,168,.65)', 20, 140, 2.2, 0);
+      floatText(p.x, p.y - 44, '撤离授权卡', '#ffe2a7', 15);
+      state.shake = 5;
+      updateHUD(true);
+      updateHints();
+      if (state.samples >= GOAL) {
+        toast('拿到撤离授权卡', '样本与授权都齐了。去东北角的 H 停机坪，准备守住救援降落。', { tone: 'story', icon: '▣', duration: 5000 });
+      } else {
+        toast('拿到撤离授权卡', `控制台解锁了。还差 ${GOAL - state.samples} 支样本，再去停机坪。`, { tone: 'story', icon: '▣', duration: 4400 });
+      }
+      return;
+    }
+    haptic(p.type === 'red' ? 22 : 12);
     const old = state.samples;
     const oldForm = state.form;
     state.samples += p.value;
@@ -2790,7 +2886,11 @@
   }
 
   function showGateReadyToast() {
-    toast('撤离信号已锁定', '8 支样本已齐。前往东北角的撤离点，按 E 呼叫救援。', { tone: 'story', icon: '☣', duration: 5000 });
+    if (!state.keycard) {
+      toast('样本已齐，但控制台还锁着', '去病房找到撤离授权卡。拿到后，再回东北角的 H 停机坪。', { tone: 'warn', icon: '▣', duration: 5200 });
+    } else {
+      toast('撤离条件齐了', '授权卡与 8 支样本都在。前往 H 停机坪，按 E 呼叫救援，然后守住 25 秒。', { tone: 'story', icon: '☣', duration: 5200 });
+    }
     state.gateEnoughShown = false;
   }
 
@@ -2798,7 +2898,7 @@
     for (const p of state.pickups) {
       if (p.taken) continue;
       if (p.notBefore > state.elapsed) continue;
-      const r = p.type === 'red' ? 36 : (p.wisp ? 27 : 31);
+      const r = p.type === 'red' ? 36 : p.type === 'keycard' ? 34 : (p.wisp ? 27 : 31);
       if (dist(player.x, player.y - 8, p.x, p.y - 8) < r) collect(p);
     }
     if (!state.firstRedHint) {
@@ -2838,6 +2938,7 @@
 
   function hurt(z) {
     if (state.phase !== 'playing' || player.invuln > 0) return;
+    haptic(35);
     state.caught++;
     const had = state.samples > 0;
     if (had) {
@@ -3041,25 +3142,40 @@
     const d = dist(player.x, player.y, GATE.interactX, GATE.interactY);
     state.nearGate = d < GATE.radius;
     const enough = state.samples >= GOAL;
+    const ready = enough && state.keycard;
 
-    if (state.nearGate && !enough) {
-      state.gateHintCooldown -= dt;
-      if (state.gateHintCooldown <= 0) {
-        state.gateHintCooldown = 4.5;
-        toast('撤离点还不能启动', `信号灯需要 8 支样本，你还差 ${GOAL - state.samples} 支。`, { tone: 'warn', icon: '☣', duration: 3000 });
+    if (state.evacActive) {
+      updateEvac(dt);
+      dom.interactPrompt.classList.remove('show');
+      dom.touchInteract.classList.add('hidden');
+      dom.wayfinder.classList.add('hidden');
+      return;
+    }
+
+    if (state.nearGate && !state.gateEnoughShown) {
+      state.gateEnoughShown = true;
+      if (!state.keycard) {
+        toast('控制台已锁定', '需要病房里的撤离授权卡。拿到卡，再带 8 支样本回来。', { tone: 'warn', icon: '▣', duration: 4200 });
         Sound.gateDenied();
+      } else if (!enough) {
+        toast('授权通过，样本不足', `控制台还需要 ${GOAL - state.samples} 支样本。`, { tone: 'warn', icon: '☣', duration: 3000 });
+        Sound.gateDenied();
+      } else {
+        toast('救援控制台已就绪', '按 E 呼叫救援，然后在停机坪坚持 25 秒。', { tone: 'story', icon: '☣', duration: 4000 });
       }
     }
-    if (state.nearGate && enough && !state.gateEnoughShown) {
-      state.gateEnoughShown = true;
-      toast('信号灯已充能', '按 E，或点击“进入撤离点”。', { tone: 'story', icon: '☣', duration: 3600 });
-    }
+    if (!state.nearGate && state.gateEnoughShown) state.gateEnoughShown = false;
+
+    setGatePrompt(ready, enough);
 
     if (input.interactRequested) {
       input.interactRequested = false;
       if (state.nearGate) {
-        if (enough) startWin();
-        else {
+        if (ready) startEvac();
+        else if (!state.keycard) {
+          Sound.gateDenied();
+          toast('还差撤离授权卡', '去隔离病房找那张金色卡片。它就在病床旁。', { tone: 'warn', icon: '▣', duration: 3200 });
+        } else {
           Sound.gateDenied();
           toast('样本还不够', `撤离点需要 8 支样本，你还差 ${GOAL - state.samples} 支。`, { tone: 'warn', icon: '☣', duration: 2600 });
         }
@@ -3068,20 +3184,117 @@
       }
     }
 
-    const showWay = enough && !state.nearGate && state.phase === 'playing';
+    const wantCard = state.samples >= GOAL && !state.keycard && !state.nearGate;
+    const showWay = (ready || wantCard) && !state.nearGate && state.phase === 'playing';
     dom.wayfinder.classList.toggle('hidden', !showWay);
-    if (showWay) updateWayfinder();
-    dom.interactPrompt.classList.toggle('show', state.nearGate && enough && state.phase === 'playing');
-    dom.touchInteract.classList.toggle('hidden', !(state.nearGate && enough && state.phase === 'playing'));
+    if (showWay) {
+      if (wantCard) updateWayfinder(KEYCARD_DEF.x, KEYCARD_DEF.y, '授权卡');
+      else updateWayfinder(GATE.x, GATE.y, '撤离点');
+    }
+
+    const showPrompt = state.nearGate && state.phase === 'playing';
+    dom.interactPrompt.classList.toggle('show', showPrompt);
+    dom.touchInteract.classList.toggle('hidden', !showPrompt);
   }
 
-  function updateWayfinder() {
-    const sx = GATE.x - state.camera.x;
-    const sy = GATE.y - state.camera.y;
+  function setGatePrompt(ready, enough) {
+    if (!dom.promptTitle) return;
+    if (ready) {
+      dom.promptTitle.textContent = '呼叫救援';
+      dom.promptSmall.textContent = '8 支样本 + 授权卡 · 守住 25 秒';
+      dom.touchInteract.textContent = '呼叫救援';
+    } else if (!state.keycard) {
+      dom.promptTitle.textContent = '控制台已锁定';
+      dom.promptSmall.textContent = '需要病房里的撤离授权卡';
+      dom.touchInteract.textContent = '检查控制台';
+    } else {
+      dom.promptTitle.textContent = '样本不足';
+      dom.promptSmall.textContent = `还差 ${Math.max(0, GOAL - state.samples)} 支样本`;
+      dom.touchInteract.textContent = '检查控制台';
+    }
+  }
+
+  function updateWayfinder(tx = GATE.x, ty = GATE.y, label = '撤离点') {
+    const sx = tx - state.camera.x;
+    const sy = ty - state.camera.y;
     const a = Math.atan2(sy - H / 2, sx - W / 2);
     dom.wayfinderArrow.style.transform = `rotate(${a + Math.PI / 2}rad)`;
+    if (dom.wayfinderLabel) dom.wayfinderLabel.textContent = label;
     dom.wayfinder.style.left = `${clamp(sx, 82, W - 82)}px`;
     dom.wayfinder.style.top = `${clamp(sy, 142, H - 132)}px`;
+  }
+
+  function startEvac() {
+    if (state.phase !== 'playing' || state.evacActive || state.evacComplete) return;
+    if (!state.keycard || state.samples < GOAL) return;
+    input.interactRequested = false;
+    state.evacActive = true;
+    state.evacTime = EVAC_HOLD;
+    state.evacInside = true;
+    state.evacSpawned = false;
+    state.evacComplete = false;
+    dom.evacHud.classList.remove('hidden');
+    dom.evacHud.classList.remove('is-paused');
+    dom.evacHud.classList.add('urgent');
+    dom.interactPrompt.classList.remove('show');
+    dom.touchInteract.classList.add('hidden');
+    dom.wayfinder.classList.add('hidden');
+    spawnEvacSurge();
+    Sound.ability(2);
+    haptic([18, 35, 18]);
+    state.shake = 8;
+    updateHints();
+    burst(GATE.x, GATE.y + 55, 'rgba(247,201,135,.9)', 45, 220, 2.6, 12);
+    toast('直升机正在降落', '留在 H 停机坪 25 秒。倒计时只在圈内推进，被扑中会掉落样本。', { tone: 'warn', icon: 'H', duration: 5200 });
+    updateHUD(true);
+  }
+
+  function updateEvac(dt) {
+    const d = dist(player.x, player.y, GATE.interactX, GATE.interactY);
+    state.evacInside = d < GATE.radius + 22;
+    if (state.evacInside) {
+      state.evacTime = Math.max(0, state.evacTime - dt);
+    }
+    const secs = Math.ceil(state.evacTime);
+    const progress = clamp(state.evacTime / EVAC_HOLD, 0, 1);
+    if (dom.evacTimeLabel) dom.evacTimeLabel.textContent = `00:${String(secs).padStart(2, '0')}`;
+    if (dom.evacProgress) dom.evacProgress.style.width = `${(1 - progress) * 100}%`;
+    if (dom.evacHint) {
+      dom.evacHint.textContent = state.evacInside
+        ? (state.samples < GOAL ? '样本掉落了，捡回来再继续守' : '留在 H 停机坪，坚持到螺旋桨落地')
+        : '回到停机坪！倒计时已暂停';
+    }
+    dom.evacHud.classList.toggle('is-paused', !state.evacInside);
+    dom.evacHud.classList.toggle('urgent', state.evacTime <= 8 || !state.evacInside);
+
+    if (state.evacTime <= 0) {
+      if (state.samples >= GOAL) {
+        state.evacActive = false;
+        state.evacComplete = true;
+        dom.evacHud.classList.add('hidden');
+        dom.evacHud.classList.remove('urgent', 'is-paused');
+        toast('救援落地', '你带着样本撑到了最后。撤离成功。', { tone: 'good', icon: 'H', duration: 2800 });
+        burst(GATE.x, GATE.y + 54, 'rgba(212,243,174,.98)', 95, 280, 3.4, 8);
+        setTimeout(() => {
+          if (state.phase === 'playing') startWin();
+        }, 650);
+      } else {
+        failEvac();
+      }
+    }
+  }
+
+  function failEvac() {
+    state.evacActive = false;
+    state.evacTime = EVAC_HOLD;
+    state.evacInside = false;
+    state.evacComplete = false;
+    dom.evacHud.classList.add('hidden');
+    dom.evacHud.classList.remove('urgent', 'is-paused');
+    state.zombies = state.zombies.filter(z => !z.temporary);
+    Sound.gateDenied();
+    toast('救援无法降落', `你丢掉了样本，现在只有 ${state.samples} 支。捡回掉落的样本，再回停机坪按 E。`, { tone: 'warn', icon: '!', duration: 5200 });
+    updateHUD(true);
   }
 
   function updateCamera(dt) {
@@ -3182,6 +3395,10 @@
     }
     if (changed('blue', state.blue)) dom.silverCount.textContent = String(state.blue);
     if (changed('red', state.red)) dom.goldCount.textContent = String(state.red);
+    if (changed('keycard', state.keycard)) {
+      dom.keycardRow.classList.toggle('has-card', state.keycard);
+      dom.keycardState.textContent = state.keycard ? '已取得' : '未取得';
+    }
 
     const lvl = dangerLevel();
     if (changed('danger', lvl + (state.anyChase ? 'c' : ''))) {
@@ -3194,9 +3411,19 @@
     }
 
     let obj;
-    if (state.samples >= GOAL) obj = '信号灯已充能 · <em>去东北角撤离点</em>';
-    else if (state.nearGate) obj = `撤离点需要 8 支样本 · <em>还差 ${GOAL - state.samples} 支</em>`;
-    else obj = `带回 8 支样本 · <em>还差 ${GOAL - state.samples} 支</em>`;
+    if (state.evacActive) {
+      obj = `救援降落中 · <em>${Math.ceil(state.evacTime)} 秒</em>`;
+    } else if (state.samples >= GOAL && state.keycard) {
+      obj = '授权与样本齐备 · <em>去 H 停机坪守住 25 秒</em>';
+    } else if (state.samples >= GOAL && !state.keycard) {
+      obj = '样本已齐 · <em>去隔离病房拿授权卡</em>';
+    } else if (state.nearGate && state.keycard) {
+      obj = `授权通过 · <em>还差 ${GOAL - state.samples} 支样本</em>`;
+    } else if (state.keycard) {
+      obj = `带 8 支样本到 H 停机坪 · <em>还差 ${GOAL - state.samples} 支</em>`;
+    } else {
+      obj = `找授权卡 + 收集样本 · <em>还差 ${GOAL - state.samples} 支</em>`;
+    }
     if (changed('objective', obj)) dom.objectiveText.innerHTML = obj;
 
     const alert = state.anyChase && state.phase === 'playing';
@@ -3208,8 +3435,14 @@
   }
 
   function updateHints() {
-    if (state.samples >= 6) {
+    if (state.evacActive) {
+      dom.hintStrip.innerHTML = '<span class="keycap">H</span><span class="hint-text">救援降落中</span><span class="hint-sep"></span><span class="hint-text subtle">留在停机坪 · 倒计时只在圈内推进</span>';
+    } else if (state.samples >= 8 && !state.keycard) {
+      dom.hintStrip.innerHTML = '<span class="keycap">▣</span><span class="hint-text">样本已齐</span><span class="hint-sep"></span><span class="hint-text subtle">去病房拿撤离授权卡</span>';
+    } else if (state.samples >= 6) {
       dom.hintStrip.innerHTML = '<span class="keycap">Shift</span><span class="hint-text">暴走冲刺</span><span class="hint-sep"></span><span class="keycap">E</span><span class="hint-text">撤离</span><span class="hint-sep"></span><span class="hint-text subtle">围栏能挡住感染者的视线</span>';
+    } else if (state.keycard) {
+      dom.hintStrip.innerHTML = '<span class="keycap">▣</span><span class="hint-text">授权卡已取得</span><span class="hint-sep"></span><span class="hint-text subtle">继续收集样本</span>';
     } else if (state.samples >= 3) {
       dom.hintStrip.innerHTML = '<span class="keycap">WASD</span><span class="hint-text">移动</span><span class="hint-sep"></span><span class="hint-text">荧光共生中 · 再拿 3 支学会暴走</span>';
     } else {
@@ -3217,14 +3450,21 @@
     }
   }
 
+  function isCoarse() {
+    return window.matchMedia('(pointer: coarse)').matches || (navigator.maxTouchPoints > 0 && window.innerWidth < 1300);
+  }
+
   function updateTouchUI() {
-    const coarse = window.matchMedia('(pointer: coarse)').matches || (navigator.maxTouchPoints > 0 && window.innerWidth < 1100);
+    const coarse = isCoarse();
     const show = coarse && state.phase === 'playing';
     dom.touchControls.classList.toggle('show', show);
     dom.touchControls.setAttribute('aria-hidden', String(!show));
     dom.touchDash.classList.toggle('locked', state.samples < 6);
     dom.hintStrip.style.display = show ? 'none' : '';
-    if (!show) dom.touchInteract.classList.add('hidden');
+    if (!show) {
+      dom.touchInteract.classList.add('hidden');
+      resetTouchStick();
+    }
   }
 
   function toggleMute() {
@@ -3252,7 +3492,9 @@
       dom.title.style.display = 'none';
     }, 560);
     setTimeout(() => {
-      toast('隔离区第 47 天', '靠近样本自动拾取：蓝 +1，红 +2。样本越亮，感染者越远就能发现你。', { tone: 'story', icon: '☣', duration: 5000 });
+      if (state.phase === 'playing') {
+        toast('隔离区第 47 天', '先去病房找撤离授权卡，再收集 8 支样本。样本越亮，感染者越远就能发现你。', { tone: 'story', icon: '☣', duration: 5600 });
+      }
     }, 850);
     updateTouchUI();
   }
@@ -3260,6 +3502,8 @@
   function openPause() {
     if (state.phase !== 'playing') return;
     state.phase = 'paused';
+    resetTouchStick();
+    dom.hud.classList.add('hidden');
     dom.pause.classList.remove('hidden');
     dom.touchControls.classList.remove('show');
     Sound.duck(true);
@@ -3268,15 +3512,19 @@
   function closePause() {
     if (state.phase !== 'paused') return;
     state.phase = 'playing';
+    dom.hud.classList.remove('hidden');
     dom.pause.classList.add('hidden');
     Sound.duck(false);
     updateTouchUI();
+    if (state.evacComplete) startWin();
   }
 
   function startWin() {
     if (state.phase !== 'playing') return;
+    state.evacComplete = false;
     state.phase = 'won';
     state.winTime = 0;
+    clearToasts();
     Sound.victory();
     dom.cinemaBars.classList.add('active');
     dom.interactPrompt.classList.remove('show');
@@ -3284,6 +3532,8 @@
     dom.alertBanner.classList.remove('active');
     dom.dangerBlock.classList.remove('is-alert');
     dom.wayfinder.classList.add('hidden');
+    dom.evacHud.classList.add('hidden');
+    dom.evacHud.classList.remove('urgent', 'is-paused');
     burst(GATE.x, GATE.y + 54, 'rgba(214,242,174,.95)', 80, 260, 3.2, 8);
     burst(GATE.x, GATE.y + 54, 'rgba(247,204,132,.78)', 35, 170, 2.2, 0);
     state.shake = 13;
@@ -3590,11 +3840,12 @@
     if (!worldVisible(p.x, p.y, 120)) return;
     const red = p.type === 'red';
     const wisp = p.type === 'wisp';
+    const keycard = p.type === 'keycard';
     const bob = Math.sin(time * 2.1 + p.bob) * 4.5;
     const x = p.x;
     const y = p.y - 16 + bob;
-    const col = red ? '236,126,91' : wisp ? '220,236,173' : '143,224,174';
-    const beamH = red ? 235 : wisp ? 78 : 150;
+    const col = keycard ? '247,211,146' : red ? '236,126,91' : wisp ? '220,236,173' : '143,224,174';
+    const beamH = keycard ? 170 : red ? 235 : wisp ? 78 : 150;
 
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
@@ -3634,7 +3885,29 @@
     ctx.translate(x, y);
     ctx.rotate(Math.sin(time * 0.8 + p.seed) * 0.08 + (red ? -0.14 : 0.1));
     ctx.scale(wisp ? 1.15 : red ? 1.38 : 1.24, wisp ? 1.15 : red ? 1.38 : 1.24);
-    if (wisp) {
+    if (keycard) {
+      const cg = ctx.createLinearGradient(-12, -8, 12, 8);
+      cg.addColorStop(0, 'rgba(255,241,194,.95)');
+      cg.addColorStop(0.52, 'rgba(226,180,108,.98)');
+      cg.addColorStop(1, 'rgba(150,103,55,.96)');
+      ctx.fillStyle = cg;
+      roundRect(ctx, -12, -8, 24, 16, 2.4);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,244,203,.72)';
+      ctx.lineWidth = .9;
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(47,58,42,.76)';
+      roundRect(ctx, -8, -4.5, 7, 5, 1.2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(62,50,30,.76)';
+      ctx.fillRect(2, -4, 7, 1.2);
+      ctx.fillRect(2, -1, 5, 1.2);
+      ctx.fillStyle = 'rgba(255,244,203,.82)';
+      ctx.beginPath();
+      ctx.arc(6.5, 4, 1.8, 0, TAU);
+      ctx.fill();
+      ctx.fillRect(6, 4, 1, 2.4);
+    } else if (wisp) {
       ctx.fillStyle = 'rgba(241,245,209,.9)';
       ctx.beginPath();
       ctx.moveTo(0, -9);
@@ -3687,28 +3960,35 @@
       ctx.fillStyle = 'rgba(255,194,146,.65)';
       ctx.fillText('+2', x, y - 34);
       ctx.restore();
+    } else if (keycard) {
+      ctx.save();
+      ctx.font = `700 8px ${SANS}`;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'rgba(255,226,168,.85)';
+      ctx.fillText('撤离授权卡', x, y - 36);
+      ctx.restore();
     }
   }
 
   function drawGate(time) {
     if (!worldVisible(GATE.x, GATE.y, 260)) return;
-    const enough = state.samples >= GOAL;
+    const ready = state.samples >= GOAL && state.keycard;
     const pulse = 0.5 + 0.5 * Math.sin(time * 2.3);
     const x = GATE.x, y = GATE.y + 60;
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     // 信号光
-    const color = enough ? '170,235,154' : '188,144,112';
+    const color = state.evacActive ? '242,151,104' : ready ? '170,235,154' : '188,144,112';
     const gr = ctx.createRadialGradient(x, y, 0, x, y, 175);
-    gr.addColorStop(0, `rgba(${color},${enough ? 0.24 + 0.08 * pulse : 0.07})`);
-    gr.addColorStop(0.4, `rgba(${color},${enough ? 0.08 : 0.025})`);
+    gr.addColorStop(0, `rgba(${color},${ready ? 0.24 + 0.08 * pulse : 0.07})`);
+    gr.addColorStop(0.4, `rgba(${color},${ready ? 0.08 : 0.025})`);
     gr.addColorStop(1, `rgba(${color},0)`);
     ctx.fillStyle = gr;
     ctx.beginPath();
     ctx.arc(x, y, 175, 0, TAU);
     ctx.fill();
     // 充满信号时，绿色光柱从撤离点亮起
-    if (enough) {
+    if (ready) {
       const pillar = ctx.createLinearGradient(x, GATE.y + 160, x, GATE.y - 300);
       pillar.addColorStop(0, 'rgba(178,240,160,.22)');
       pillar.addColorStop(0.24, 'rgba(178,240,160,.1)');
@@ -3735,7 +4015,7 @@
       }
     }
     // 旋转的搜索灯
-    if (enough) {
+    if (ready) {
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(time * 0.35);
@@ -3755,15 +4035,34 @@
     }
     // 信号灯
     const bx = 2320, by = 244;
-    ctx.fillStyle = enough ? `rgba(218,255,183,${0.65 + 0.3 * pulse})` : 'rgba(221,129,92,.62)';
+    ctx.fillStyle = ready ? `rgba(218,255,183,${0.65 + 0.3 * pulse})` : 'rgba(221,129,92,.62)';
     ctx.beginPath();
     ctx.arc(bx, by, 4.4, 0, TAU);
     ctx.fill();
-    ctx.strokeStyle = enough ? `rgba(189,245,169,${0.25 * pulse})` : 'rgba(221,129,92,.2)';
+    ctx.strokeStyle = ready ? `rgba(189,245,169,${0.25 * pulse})` : 'rgba(221,129,92,.2)';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.arc(bx, by, 12 + pulse * 6, 0, TAU);
     ctx.stroke();
+    // 撤离守点圈：进入 25 秒倒计时后，停机坪成为必须守住的区域。
+    if (state.evacActive) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      const ringPulse = 0.5 + 0.5 * Math.sin(time * 3.2);
+      ctx.strokeStyle = `rgba(246,168,112,${0.28 + ringPulse * 0.18})`;
+      ctx.lineWidth = 3;
+      ctx.setLineDash([12, 10]);
+      ctx.beginPath();
+      ctx.arc(x, GATE.interactY, 148, 0, TAU);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.strokeStyle = `rgba(255,206,149,${0.06 + ringPulse * 0.05})`;
+      ctx.lineWidth = 16;
+      ctx.beginPath();
+      ctx.arc(x, GATE.interactY, 148, 0, TAU);
+      ctx.stroke();
+      ctx.restore();
+    }
     ctx.restore();
   }
 
@@ -4572,7 +4871,7 @@
   let frameTime = 0;
 
   function loop(now) {
-    const dt = Math.min(0.033, (now - last) / 1000);
+    const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     frameTime = now / 1000;
     update(dt);
@@ -4582,7 +4881,9 @@
   }
 
   function resize() {
-    DPR = Math.min(2, window.devicePixelRatio || 1);
+    const coarse = isCoarse();
+    document.body.classList.toggle('touch-mode', coarse);
+    DPR = Math.min(coarse && window.innerWidth < 1100 ? 1 : 2, window.devicePixelRatio || 1);
     dom.canvas.width = Math.floor(W * DPR);
     dom.canvas.height = Math.floor(H * DPR);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
@@ -4591,6 +4892,43 @@
     dom.uiLayer.style.transform = `scale(${rect.width / W})`;
     const portrait = window.innerHeight > window.innerWidth && window.innerWidth < 900;
     dom.rotateHint.style.display = portrait ? 'flex' : 'none';
+  }
+
+  function lockLandscape() {
+    try {
+      if (screen.orientation && screen.orientation.lock) {
+        const p = screen.orientation.lock('landscape');
+        if (p && p.catch) p.catch(() => {});
+      }
+    } catch (e) {}
+  }
+
+  function enterMobileFullscreen() {
+    const el = document.documentElement;
+    if (!document.fullscreenElement && el.requestFullscreen) {
+      const p = el.requestFullscreen();
+      if (p && p.then) p.then(lockLandscape).catch(lockLandscape);
+      else lockLandscape();
+    } else {
+      lockLandscape();
+    }
+  }
+
+  function toggleFullscreen() {
+    if (document.fullscreenElement) {
+      const p = document.exitFullscreen && document.exitFullscreen();
+      if (p && p.catch) p.catch(() => {});
+    } else {
+      enterMobileFullscreen();
+    }
+  }
+
+  function startFromTitle() {
+    startGame();
+  }
+
+  function haptic(ms = 12) {
+    try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
   }
 
   function buildGrain() {
@@ -4610,6 +4948,69 @@
     grain = ctx.createPattern(c, 'repeat');
   }
 
+  function bindTouchStick() {
+    const pad = dom.dpad;
+    if (!pad) return;
+    const buttons = [...pad.querySelectorAll('.dpad-btn')];
+    let active = null;
+
+    const clear = () => {
+      input.touch.left = false;
+      input.touch.right = false;
+      input.touch.up = false;
+      input.touch.down = false;
+      pad.classList.remove('is-dragging');
+      buttons.forEach(b => b.classList.remove('pressed'));
+      if (dom.dpadCore) dom.dpadCore.style.transform = '';
+      active = null;
+    };
+
+    const apply = e => {
+      const rect = pad.getBoundingClientRect();
+      const nx = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
+      const ny = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
+      const dead = 0.2;
+      input.touch.left = nx < -dead;
+      input.touch.right = nx > dead;
+      input.touch.up = ny < -dead;
+      input.touch.down = ny > dead;
+      pad.classList.add('is-dragging');
+      if (dom.dpadCore) {
+        dom.dpadCore.style.transform = `translate(${clamp(nx, -1, 1) * rect.width * 0.16}px, ${clamp(ny, -1, 1) * rect.height * 0.16}px)`;
+      }
+      buttons.forEach(b => {
+        const d = b.dataset.move;
+        b.classList.toggle('pressed', !!input.touch[d]);
+      });
+    };
+
+    pad.addEventListener('pointerdown', e => {
+      if (active !== null) return;
+      e.preventDefault();
+      active = e.pointerId;
+      try { pad.setPointerCapture(e.pointerId); } catch (err) {}
+      apply(e);
+      haptic(4);
+    });
+    pad.addEventListener('pointermove', e => {
+      if (e.pointerId !== active) return;
+      e.preventDefault();
+      apply(e);
+    });
+    const end = e => {
+      if (e.pointerId !== active) return;
+      e.preventDefault();
+      clear();
+    };
+    pad.addEventListener('pointerup', end);
+    pad.addEventListener('pointercancel', end);
+    pad.addEventListener('lostpointercapture', e => {
+      if (e.pointerId === active) clear();
+    });
+    pad.addEventListener('contextmenu', e => e.preventDefault());
+    resetTouchStick = clear;
+  }
+
   function bind() {
     window.addEventListener('resize', resize);
     window.addEventListener('keydown', keyDown);
@@ -4620,7 +5021,9 @@
     document.addEventListener('visibilitychange', () => {
       if (document.hidden && state.phase === 'playing') openPause();
     });
-    dom.startBtn.addEventListener('click', startGame);
+    dom.startBtn.addEventListener('click', startFromTitle);
+    dom.mobileStartBtn.addEventListener('click', startFromTitle);
+    dom.fullscreenBtn.addEventListener('click', toggleFullscreen);
     dom.pauseBtn.addEventListener('click', openPause);
     dom.resumeBtn.addEventListener('click', closePause);
     dom.resumeBtn2.addEventListener('click', closePause);
@@ -4629,25 +5032,19 @@
       if (state.phase === 'won') restartGame();
     });
     dom.interactPrompt.addEventListener('click', () => {
-      if (state.nearGate && state.samples >= GOAL) startWin();
+      if (state.phase === 'playing') input.interactRequested = true;
     });
 
-    document.querySelectorAll('[data-move]').forEach(btn => {
-      const dir = btn.dataset.move;
-      const on = e => { e.preventDefault(); input.touch[dir] = true; btn.classList.add('pressed'); };
-      const off = e => { e.preventDefault(); input.touch[dir] = false; btn.classList.remove('pressed'); };
-      btn.addEventListener('pointerdown', on);
-      btn.addEventListener('pointerup', off);
-      btn.addEventListener('pointercancel', off);
-      btn.addEventListener('pointerleave', off);
-      btn.addEventListener('contextmenu', e => e.preventDefault());
-    });
+    bindTouchStick();
     dom.touchDash.addEventListener('pointerdown', e => {
       e.preventDefault();
-      if (state.phase === 'playing') input.dashRequested = true;
+      if (state.phase === 'playing') {
+        input.dashRequested = true;
+        haptic(8);
+      }
     });
     dom.touchInteract.addEventListener('click', () => {
-      if (state.nearGate && state.samples >= GOAL) startWin();
+      if (state.phase === 'playing') input.interactRequested = true;
     });
     dom.canvas.addEventListener('contextmenu', e => e.preventDefault());
   }
@@ -4703,7 +5100,7 @@
           return true;
         },
         giveAll: () => {
-          for (const id of ['blue-1', 'blue-2', 'blue-3', 'blue-4', 'red-1', 'red-2']) {
+          for (const id of ['blue-1', 'blue-2', 'blue-3', 'blue-4', 'red-1', 'red-2', 'keycard']) {
             const p = state.pickups.find(p => p.id === id && !p.taken);
             if (p) { player.x = p.x; player.y = p.y; collect(p); }
           }
@@ -4713,6 +5110,15 @@
           state.camera.y = clamp(GATE.y - H / 2, 0, WORLD.h - H);
           updateHUD(true);
         },
+        keycard: () => {
+          const p = state.pickups.find(p => p.id === 'keycard' && !p.taken);
+          if (!p) return false;
+          player.x = p.x; player.y = p.y;
+          collect(p);
+          return true;
+        },
+        startEvac: () => startEvac(),
+        setEvacTime: t => { state.evacTime = Math.max(0, Number(t) || 0); },
         damage: () => {
           const z = state.zombies[0];
           z.x = player.x + 20; z.y = player.y + 10;
@@ -4741,6 +5147,11 @@
           form: state.form,
           caught: state.caught,
           elapsed: state.elapsed,
+          keycard: state.keycard,
+          evacActive: state.evacActive,
+          evacTime: state.evacTime,
+          evacInside: state.evacInside,
+          evacComplete: state.evacComplete,
           player: { x: player.x, y: player.y, vx: player.vx, vy: player.vy, invuln: player.invuln },
           zombies: state.zombies.map(z => ({ id: z.id, x: z.x, y: z.y, state: z.state, awareness: z.awareness, dazed: z.dazed })),
           pickups: state.pickups.filter(p => !p.taken).map(p => ({ id: p.id, type: p.type, x: p.x, y: p.y })),

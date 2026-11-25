@@ -4,19 +4,22 @@
 
 一个以“收集”为核心的丧尸末日题材单页互动作品。你是一个提着灯的幸存者，在封锁区里收集荧光抗体样本；样本让你跑得更快、变得更强，也让感染者从更远处发现你。
 
-**目标：带 8 支样本抵达东北角的 H 停机坪，按 `E` 呼叫救援。**
+**目标：先在病房拿到撤离授权卡，带 8 支样本抵达东北角的 H 停机坪，在停机坪坚持 25 秒等直升机落地。**
 
-[![试玩](https://img.shields.io/badge/PLAY-进入感染区-a5e5a7?style=for-the-badge)](https://nanci101.github.io/lantern-zone/)
+[![手机试玩](https://img.shields.io/badge/PLAY-手机横屏试玩-a5e5a7?style=for-the-badge)](https://cdn.jsdelivr.net/gh/nanci101/lantern-zone@main/play.xhtml)
 [![海报](https://img.shields.io/badge/POSTER-A2%20海报-e7b566?style=for-the-badge)](poster/poster.png)
 
-- **在线试玩：** <https://nanci101.github.io/lantern-zone/>
+- **手机试玩（推荐，单文件 XHTML CDN）：** <https://cdn.jsdelivr.net/gh/nanci101/lantern-zone@main/play.xhtml>
+- **GitHub Pages：** <https://nanci101.github.io/lantern-zone/>
 - **GitHub 仓库：** <https://github.com/nanci101/lantern-zone>
 - **可打印海报：** [poster/poster.pdf](poster/poster.pdf)
 - **离线单文件：** [standalone.html](standalone.html)
 
-> 如果所在网络打不开 `github.io`：直接双击 / 分发 `standalone.html` 即可离线游玩；也可以在项目目录运行 `python -m http.server 5080`，用本机地址进入。
+> 手机请横屏，点“横屏开始”。左侧圆盘拖动移动，右侧“暴走”/“检查控制台”。进入游戏后，右上角 `⛶` 可全屏。
+>
+> 如果所在网络打不开 `github.io`，用上面的 jsDelivr 试玩地址；也可以直接双击 / 分发 `standalone.html` 离线游玩。
 
-推荐使用桌面浏览器；手机横屏也可以玩，右下“暴走”按钮在 6 支样本后解锁。
+**作者：** nanci101 · **类型：** 单人收集 / 潜行 · **时长：** 约 5 分钟
 
 ## 为什么是丧尸，为什么不是三关
 
@@ -24,23 +27,27 @@
 
 我把三关压缩成**一张连续、可自由探索的隔离区地图**：南侧公路、隔离病房、水池断桥、广播塔、撤离停机坪。收集、躲避和选路线同时发生；危险不是被关在某一关里，而是跟着你携带的光走。
 
-## 玩法
+## 三步撤离
 
-- **蓝色抗体 `+1` / 红色活性样本 `+2`**
-- **全场只有 4 蓝 + 3 红**；想凑够 8 支，至少要进入**两个红色隔离区**
+1. **拿授权卡**：金色卡片在隔离病房病床旁；没有它，H 停机坪控制台不会启动。
+2. **凑 8 支样本**：蓝色 `+1`，红色 `+2`。全场只有 4 蓝 + 3 红，至少要闯进两个红色隔离区。
+3. **守住 25 秒**：在 H 停机坪按 `E` 呼叫救援。倒计时只在停机坪圈内推进；感染者会循声围过来。
+
 - 收集会改变角色：
   - 3 支：**荧光共生**，移动更快，外观出现荧光血管与短菌丝
-  - 6 支：**临界暴走**，解锁 `Shift` 冲刺
+  - 6 支：**临界暴走**，解锁 `Shift` / 触屏“暴走”冲刺
   - 8 支：信号共振，撤离点的绿色光柱亮起
 - **核心规则：样本越亮，感染者的感知范围越远。** 被扑中会掉落 1 支样本，可返回捡起。
 - 围栏、车辆、推车、墙体会截断感染者的视锥；你可以绕路、躲藏，或用暴走冲刺甩开它们。
+- 如果守点失败（倒计时结束时样本不足），掉落样本仍可捡回，回停机坪再试一次。
 
-| 操作 | 键盘 | 触屏 |
+| 操作 | 键盘 | 手机触屏 |
 | --- | --- | --- |
-| 移动 | `WASD` / 方向键 | 左下方向键 |
-| 暴走 | `Shift`（6 支解锁） | 右下按钮 |
-| 进入撤离点 | `E` | 靠近后点按钮 |
+| 移动 | `WASD` / 方向键 | 左下圆盘拖动（支持斜向） |
+| 暴走 | `Shift`（6 支解锁） | 右下“暴走”按钮 |
+| 检查控制台 / 呼叫救援 | `E` | 靠近停机坪后点提示按钮 |
 | 暂停 | `Esc` / `P` | 右上暂停 |
+| 全屏 | — | 右上 `⛶` |
 | 静音 | `M` | 右上声音 |
 
 ## 截图
@@ -56,6 +63,12 @@
 | 暂停规则页 | 手机横屏 |
 | --- | --- |
 | ![暂停](playtest/pause.png) | ![手机](playtest/mobile.png) |
+
+手机端标题、触控与停机坪守点：
+
+| 手机标题 | 停机坪倒计时 |
+| --- | --- |
+| ![手机标题](playtest/mobile-title.png) | ![手机守点](playtest/mobile-evac.png) |
 
 A2 海报：
 
@@ -78,6 +91,7 @@ lantern-zone/
 ├─ style.css                  # 标题、HUD、弹层、触屏界面
 ├─ game.js                    # Canvas 2D 游戏逻辑与画面生成
 ├─ standalone.html            # 离线单文件版（CSS/JS 已内联）
+├─ play.xhtml                 # 手机 CDN 版（XHTML，适合 jsDelivr）
 ├─ poster/
 │  ├─ poster.png              # A2 海报（2480 × 3508）
 │  ├─ poster.pdf              # 可打印 PDF
@@ -102,8 +116,10 @@ python -m http.server 5077
 
 - 纯原生 HTML / CSS / JavaScript，无任何第三方图片、字体或音频依赖。
 - Canvas 2D 实时绘制，Web Audio 合成音效。
-- 响应式 16:9 舞台与触屏方向键；桌面 / 手机均可玩。
-- GitHub Pages 静态部署。
+- 响应式 16:9 舞台；手机横屏下使用加大的触控圆盘、暴走键、全屏按钮与守点 HUD。
+- 移动端把渲染 DPR 限制为 1，避免高 DPI 手机上 Canvas 过重；实测在 844×390 触控视口下可保持实时速度。
+- `play.xhtml` 是内联 CSS/JS 的 XHTML 单文件版，通过 jsDelivr CDN 提供可直接打开的试玩页。
+- GitHub Pages 静态部署；离线版 `standalone.html`。
 
 ## 关于示例
 
@@ -111,6 +127,6 @@ python -m http.server 5077
 
 ## 作者与状态
 
-- 设计与代码：nanci101
-- 类型：单人 · 收集 / 潜行 · 约 4 分钟
-- 状态：已完成并部署 GitHub Pages；试玩修复记录见 [PLAYTEST.md](PLAYTEST.md)
+- **作者 / 设计与代码：** nanci101
+- 类型：单人 · 收集 / 潜行 · 约 5 分钟
+- 状态：已完成手机横屏适配与 25 秒守点流程；试玩记录见 [PLAYTEST.md](PLAYTEST.md)
